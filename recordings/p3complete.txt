@@ -1,0 +1,58 @@
+read prayer
+u
+n
+n
+u
+s
+s
+s
+w
+n
+w
+s
+s
+se
+s
+hi ket
+ask
+storm
+four
+offering
+dump kaur
+e
+n
+w
+e
+e
+n
+e
+fill cup with seawater
+take stone
+w
+n
+put cup on west altar
+place crystal on south altar
+place stone on north altar
+place fan on east altar
+take lantern
+pray to storm
+whisper
+s
+s
+w
+w
+nw
+n
+n
+e
+s
+e
+n
+n
+n
+d
+s
+s
+d
+dig
+record off

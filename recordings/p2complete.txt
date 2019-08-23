@@ -1,0 +1,130 @@
+ask
+hi
+ask
+agree
+n
+nw
+nw
+w
+sw
+sw
+s
+e
+s
+e
+n
+look through lens
+n
+turn dial to 3
+turn dial to 6
+turn dial to 15
+turn dial to 28
+e
+take key
+w
+open north door with grey key
+n
+d
+u
+s
+s
+s
+w
+n
+w
+s
+s
+se
+e
+e
+e
+hi maker
+plank
+w
+w
+w
+nw
+n
+n
+e
+s
+e
+n
+n
+n
+d
+use board
+s
+take ingot
+n
+u
+s
+s
+s
+w
+n
+w
+s
+s
+se
+hi
+boulders
+buy pickaxe
+nw
+n
+n
+n
+ne
+ne
+break rocks with pickaxe
+w
+look through lens
+open box
+rough
+take key
+take book
+s
+e
+sw
+sw
+s
+e
+s
+e
+n
+n
+n
+s
+break rock with pickaxe
+w
+take vellum
+take chair
+e
+n
+d
+s
+unlock west door
+w
+look through lens
+break star
+w
+take cube
+e
+break rocks with pickaxe
+e
+take tablet
+w
+x tablet
+press 2
+press 2
+press 3
+press 3
+press 3
+press 3
+press 1
+take cube key
+unlock south door
+s
+d
+take all
+record off
