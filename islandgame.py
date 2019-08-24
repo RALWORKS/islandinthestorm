@@ -3575,12 +3575,12 @@ parser.lastTurn.gameOpening = opening
 
 screen = app.primaryScreen()
 screen = screen.size()
-box_style1 = "QFrame {background-color: #232323; border: 1px solid #ffffff; border-radius:0px; margin-bottom: 15px} QLabel {color: #ffffff; border: none;}"
-box_style2 = "QFrame {background-color: #3a3a01; border: 2px solid #edf424; border-radius:0px; margin-bottom: 15px} QLabel {color: #edf424; border: none;}"
-special_box_style = "QFrame {background-color: #210111; border: 2px solid #f4245c; border-radius:0px; margin-bottom: 15px} QLabel {color: #f4245c; border: none;}"
+box_style1 = "QFrame {background-color: #232323; border: 1px solid #ffffff; border-radius:0px; margin-bottom: 15px} QLabel {color: #ffffff; border: none; font-size: 18px;}"
+box_style2 = "QFrame {background-color: #3a3a01; border: 2px solid #edf424; border-radius:0px; margin-bottom: 15px} QLabel {color: #edf424; border: none; font-size: 18px;}"
+special_box_style = "QFrame {background-color: #210111; border: 2px solid #f4245c; border-radius:0px; margin-bottom: 15px} QLabel {color: #f4245c; border: none; font-size: 18px;}"
 app_style = """
 	#MainWindow {
-		background-image: url(island_bg1.png);
+		background-image: url(island_bg2.png);
 		background-color: #000000;
 	}
 	QLineEdit {
