@@ -1,5 +1,5 @@
 # imports from other libraries
-import sys
+import os, sys
 import random
 from PyQt5.QtWidgets import QApplication
 
@@ -13,19 +13,30 @@ from intficpy.verb import Verb
 import intficpy.parser as parser
 import intficpy.gui as gui
 
+# Translate asset paths to useable format for PyInstaller
+def resource_path(relative_path):
+	if hasattr(sys, '_MEIPASS'):
+		return os.path.join(sys._MEIPASS, relative_path)
+	return os.path.join(os.path.abspath('.'), relative_path)
 
 app = QApplication(sys.argv)
 gui.Prelim(__name__)
 
-parser.aboutGame.setInfo("ISLAND OF THE BLESSED", "JSMaika")
+parser.aboutGame.setInfo("ISLAND IN THE STORM", "JSMaika")
 parser.aboutGame.desc = "A storm comes out of nowhere as you are sailing through uncharted waters, causing you to crash on an isolated island. Something isn't right here. There's something odd about the islanders, and you can't shake the feeling that you're being watched. Can you uncover the secrets of the island and escape alive? "
-
+parser.aboutGame.game_instructions = "<i>Island in the Storm</i> is a fantasy puzzle game with mystery elements. The objective of the game is to escape the island. In order to do this, you will need to explore, solve puzzles and interact with islanders. A few hints:<br><br>While the game accepts conversation commands in the classic IF ask/tell/give/show format, all conversation topics can be reached through TALK TO. To talk about the suggested topics (listed in parentheses under the character's response), type out all or part of the suggestion. For instance, you could accept the suggestion, \"You could ask what the woman does for a living,\" by typing ASK WHAT THE WOMAN DOES FOR A LIVING. Unless there were other suggestions that used the word \"living\", you could also just type LIVING.<br><br>When travelling through dark areas, bring your light crystal. It recharges in full light. At full charge, it will last 50 turns. Be sure not to let it die while you're in the dark.<br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt<br><br>Good luck!"
+parser.aboutGame.help_msg = "<i>Island in the Storm</i> is a fantasy puzzle game. To escape alive, you'll need to explore the island, talk with the locals, and uncover the truth. <br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt"
 # rooms
 # SHACK 0
 shack0 = Room("Shack interior", "You are in wooden shack. Light filters in through a cracked, dirty window. ")
 shack0.storm_desc = "You are in wooden shack. Lightning flashes in the cracked window. The walls creak from the storm winds. "
 me = Player("me")
 bed0 = Surface("bed", me)
+bed0.describeThing("There is a bed here. ")
+bed0.xdescribeThing("There is a bed here. <<bedBoxDesc(app)>>")
+def bedBoxDesc(app):
+	if underbed0.containsItem(opalbox):
+		return "It looks like there might be something underneath. "
 bed0.canLie = True
 shack0.addThing(bed0)
 #shack0.addThing(me)
@@ -187,7 +198,7 @@ lightcrystal.addSynonym("light")
 lightcrystal.setAdjectives(["light"])
 lightcrystal.consumable = True
 lightcrystal.turns_left = 5
-lightcrystal.max_turns = 100 #15?
+lightcrystal.max_turns = 50 #15?
 lightcrystal.player_can_light = False
 lightcrystal.player_can_extinguish = False
 lightcrystal.cannot_light_msg = "Once charged by sunlight, the crystal will light itself in darkness. "
@@ -1082,6 +1093,8 @@ def araiStorm(app, suggest=True):
 		arai.printSuggestions(app)
 arai_storm_special.func = araiStorm
 arai_storm.func = araiStorm
+arai_key = Topic("Arai stiffens. \"That's nothing,\" she says. \"Put it back where you found it. Hell, throw it into the sea.\" She glances nervously toward the bed. ")
+arai_key_special = SpecialTopic("ask about the silver key", arai_key.text)
 arai_her = SpecialTopic("ask who 'Her' is", "Arai bites her lip, and looks down at her feet. ")
 def araiHer(app, suggest=True):
 	app.printToGUI(arai_her.text)
@@ -1275,6 +1288,7 @@ opalbox_key = Key()
 opalbox_key.setAdjectives(["silver"])
 opalbox_lock = Lock(True, opalbox_key)
 opalbox.setLock(opalbox_lock)
+arai.addTopic("asktellgiveshow", arai_key, opalbox_key)
 
 # SHACK 1
 shack1 = Room("Shack, Attic", "You are in a cramped attic. ")
@@ -1295,6 +1309,9 @@ wand.xdescribeThing("A delicately carved dragon spirals round the wooden baton. 
 #dullbook1 = Book("book", "You read a few lines. It appears to be an exceptionally dull novel. ")
 #shelf1.addThing(dullbook1)
 shelf1.addThing(opalbox_key)
+def atticDiscover(me, app):
+	arai.addSpecialTopic(arai_key_special)
+shack1.onDiscover = atticDiscover
 
 # SHORE 2
 shore2 = OutdoorRoom("Shore, Outside the Shack", "The sandy shore extends around the island to the east. A path to the southwest leads into the forest. ")
@@ -1318,6 +1335,7 @@ rocks2.setAdjectives(["large", "sharp", "west"])
 rocks2.addSynonym("boulders")
 rocks2.verbose_name = "large rocks"
 rocks2.describeThing("Large rocks block the way to the west. ")
+rocks2.xdescribeThing("Large rokcs block the way to the west. ")
 rocks2.invItem = False
 rock_barriers.append(rocks2)
 def rocks2Break(me, app):
@@ -1493,7 +1511,7 @@ shore3.floor.storm_xdesc = "The sand is wet, and riddled from the rain. "
 forestThing3 = forestThing2.copyThingUniqueIx()
 forestThing3.describeThing("There is a thick forest to the south. ")
 shore3.addThing(forestThing3)
-shore3.addThing(arai_journal)
+#shore3.addThing(arai_journal)
 
 # SHORE 4 (WRECK SITE 1)
 shore4 = OutdoorRoom("Shore, Site of a Long Ago Wreck", "The sandy shore extends around the island to the southeast and northwest. ")
@@ -1779,7 +1797,7 @@ forest11.floor.verbose_name = "main path"
 forest11.floor.describeThing("")
 forest11.floor.xdescribeThing("The path here is narrow, and overgrown. ")
 forestThing11 = forestThing5.copyThingUniqueIx()
-forestThing11.describeThing("Forest grows thick on the upward slope to the east of the path, and a bit thinner on the steep western side. Directly east of you, a faint trail meanders up the mountain. It looks passable. ")
+forestThing11.describeThing("Forest grows thick on the downward slope to the west of the path, and a bit thinner on the eastern side. Directly east of you, a faint trail meanders up the mountain. It looks passable. ")
 forestThing11.xdescribeThing("The trees here are old, and tall. ")
 forest11.storm_desc = "The forest is thick as dark around you. The leaves  flail in the wind, loud as an angry sea. "
 forest11.addThing(forestThing11)
@@ -1844,7 +1862,7 @@ forestThing13.xdescribeThing("The trees here are old, and tall. ")
 forest13.addThing(forestThing13)
 
 # TEMPLE 14, ABANDONED TEMPLE
-temple14 = OutdoorRoom("Ruin", "You find yourself in what appears to be a long-abandoned temple. ")
+temple14 = OutdoorRoom("Ruin", "You find yourself in what appears to be a long-abandoned temple. A trail leads into the woods to the west. ")
 temple14.ceiling.xdescribeThing("<<skyState()>>")
 #temple14.north = cave0
 forest13.east = temple14
@@ -1863,6 +1881,19 @@ temple14.floor.addSynonym("grass")
 temple14.floor.describeThing("The ground is a mosaic of stones, in greys, and earthy reds, coming together into an image of a dragon, circling the ruin. ")
 temple14.floor.storm_desc = "The stone-tiled ground is slick with water. "
 temple14.floor.storm_xdesc = "The stone-tiled ground is slick with water. "
+
+cave_entrance14 = Thing("cave")
+cave_entrance14.describeThing("To the north is the entrance to a cave. ")
+cave_entrance14.xdescribeThing("To the north is the entrance to a cave. ")
+cave_entrance14.direction = "in"
+cave_entrance14.invItem = False
+temple14.addThing(cave_entrance14)
+
+def mainCavesEnter(me, app):
+	from intficpy.travel import travelN
+	travelN(me, app)
+cave_entrance14.climbInVerbDobj = mainCavesEnter
+
 def viewDragon():
 	pass
 	#hints.closeNode(dragonHintNode)
@@ -3569,7 +3600,7 @@ cavegroup.setMembers([cave0, cave1, cave2, cave3, cave4, cave4_2, cave5, cave6, 
 
 # FUNCTIONS
 def opening(a):
-	a.printToGUI("<b>ISLAND OF THE BLESSED: by JSMaika</b><br> <<m>> You are a sailor, on a long, solo journey across the Yalukan Ocean. You have passed many days alone on your little boat, and you will pass many more before you reach your homeland. One evening, as you are navigating through a small, mapped area in otherwise uncharted waters, you find yourself suddenly in the middle of a violent storm. You are blown off course - far off course. It is all you can do to keep from capsizing. <<m>> Despite your desperate attempts, you fail to escape the storm. The waves are dark mountains around you; titans, ready to swallow you whole, or crush you beneath their weight. You hold your tiny boat steady, riding wave after giant wave. You are cold, soaked to the skin. Your fingers ache as you tug the ropes. You are fading. <<m>> You are thrown suddenly out of your boat. Your body crashes against something hard, knocking the wind out of you. You have a sense, for a moment, of an inhuman presence, of something reaching toward you, before the world fades to nothing.")
+	a.printToGUI("<b>ISLAND OF THE BLESSED: by JSMaika</b><br> <<m>> You are a sailor, on a long, solo journey across the Yalukan Ocean. You have passed many days alone on your little boat, and you will pass many more before you reach your homeland. One evening, as you are navigating through a small, mapped area in otherwise uncharted waters, you find yourself suddenly in the middle of a violent storm. You are blown off course - far off course. It is all you can do to keep from capsizing. <<m>> Despite your desperate attempts, you fail to escape the storm. The waves are dark mountains around you; titans, ready to swallow you whole, or crush you beneath their weight. You hold your tiny boat steady, riding wave after giant wave. You are cold, soaked to the skin. Your fingers ache as you tug the ropes. You are fading. <<m>> You are thrown suddenly out of your boat. Your body crashes against something hard, knocking the wind out of you. You have a sense, for a moment, of an inhuman presence, of something reaching toward you, before the world fades to nothing. <<m>> Welcome to <i>Island in the Storm</i>. Type INSTRUCTIONS for instructions.")
 
 parser.lastTurn.gameOpening = opening
 
@@ -3584,7 +3615,8 @@ app_style = """
 		background-color: #000000;
 	}
 	QLineEdit {
-		background: #ffffff
+		background: #ffffff;
+		font-size: 18px;
 	}
 """
 scroll_style = """
@@ -3632,7 +3664,7 @@ scroll_style = """
 	}
 
     """
-ex = gui.App(me, box_style1, box_style2, scroll_style, app_style)
+ex = gui.App(me, box_style1, box_style2, scroll_style, app_style, resource_path('island-icon.png'))
 ex.show()
 sys.exit(app.exec_())
 
