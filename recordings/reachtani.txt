@@ -1,0 +1,16 @@
+u
+take key
+d
+look under bed
+unlock box
+open box
+take opal
+w
+sw
+sw
+s
+w
+s
+w
+w
+take dress

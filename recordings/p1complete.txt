@@ -2,9 +2,6 @@ u
 take key
 d
 hi
-ask
-ask
-ask about storm
 look under bed
 take box
 unlock box
@@ -98,4 +95,4 @@ se
 s
 repair sail
 thread
-patch boat
+use kit

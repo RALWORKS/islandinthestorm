@@ -4,7 +4,7 @@ import random
 from PyQt5.QtWidgets import QApplication
 
 # imports from intficpy
-from intficpy.room import Room, OutdoorRoom, RoomGroup
+from intficpy.room import Room, OutdoorRoom, RoomGroup, rooms
 from intficpy.thing import Thing, Surface, Container, Clothing, Abstract, Key, Lock, UnderSpace, LightSource, Transparent, Readable, Book, Pressable, Liquid
 from intficpy.score import Achievement, Ending, HintNode, Hint, hints, score
 from intficpy.travel import TravelConnector, DoorConnector, LadderConnector, StaircaseConnector
@@ -24,13 +24,18 @@ gui.Prelim(__name__)
 
 parser.aboutGame.setInfo("ISLAND IN THE STORM", "JSMaika")
 parser.aboutGame.desc = "A storm comes out of nowhere as you are sailing through uncharted waters, causing you to crash on an isolated island. Something isn't right here. There's something odd about the islanders, and you can't shake the feeling that you're being watched. Can you uncover the secrets of the island and escape alive? "
-parser.aboutGame.game_instructions = "<i>Island in the Storm</i> is a fantasy puzzle game with mystery elements. The objective of the game is to escape the island. In order to do this, you will need to explore, solve puzzles and interact with islanders. A few hints:<br><br>While the game accepts conversation commands in the classic IF ask/tell/give/show format, all conversation topics can be reached through TALK TO. To talk about the suggested topics (listed in parentheses under the character's response), type out all or part of the suggestion. For instance, you could accept the suggestion, \"You could ask what the woman does for a living,\" by typing ASK WHAT THE WOMAN DOES FOR A LIVING. Unless there were other suggestions that used the word \"living\", you could also just type LIVING.<br><br>When travelling through dark areas, bring your light crystal. It recharges in full light. At full charge, it will last 50 turns. Be sure not to let it die while you're in the dark.<br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt<br><br>Good luck!"
+parser.aboutGame.game_instructions = "<i>Island in the Storm</i> is a fantasy puzzle game with mystery elements. The objective of the game is to escape the island. In order to do this, you will need to explore, solve puzzles and interact with islanders. A few hints:<br><br>While the game accepts conversation commands in the classic IF ask/tell/give/show format, all conversation topics can be reached through TALK TO. To talk about the suggested topics (listed in parentheses under the character's response), type out all or part of the suggestion. For instance, you could accept the suggestion, \"You could ask what the woman does for a living,\" by typing ASK WHAT THE WOMAN DOES FOR A LIVING. Unless there were other suggestions that used the word \"living\", you could also just type LIVING. Suggestions are only available immediately after they are given. <br><br>When travelling through dark areas, bring your light crystal. It recharges in full light. At full charge, it will last 50 turns. Be sure not to let it die while you're in the dark.<br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt<br><br>Good luck!"
 parser.aboutGame.help_msg = "<i>Island in the Storm</i> is a fantasy puzzle game. To escape alive, you'll need to explore the island, talk with the locals, and uncover the truth. <br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt"
 # rooms
 # SHACK 0
 shack0 = Room("Shack interior", "You are in wooden shack. Light filters in through a cracked, dirty window. ")
 shack0.storm_desc = "You are in wooden shack. Lightning flashes in the cracked window. The walls creak from the storm winds. "
 me = Player("me")
+
+def killMyself(me, app):
+	app.printToGUI("Oh, come now. Don't give up just yet. ")
+me.killVerbDobj = killMyself
+
 bed0 = Surface("bed", me)
 bed0.describeThing("There is a bed here. ")
 bed0.xdescribeThing("There is a bed here. <<bedBoxDesc(app)>>")
@@ -50,6 +55,46 @@ bed0.addComposite(underbed0)
 # ABSTRACTS
 #goddess_abs = Abstract("goddess")
 goddess_abs = Actor("goddess")
+goddess_abs.describeThing("")
+goddess_abs.level = 0
+
+def buyGoddess(me, app, iobj):
+	app.printToGUI("That is impossible. ")
+goddess_abs.buyFromVerbDobj = buyGoddess
+
+def breakGoddess(me, app):
+	app.printToGUI("The Goddess of the Storm is unbreakable. ")
+goddess_abs.breakVerbDobj = breakGoddess
+
+def killGoddess(me, app):
+	app.printToGUI("Hah! It's not going to be <i>that</i> easy. ")
+goddess_abs.killVerbDobj = killGoddess
+
+def giveGoddess(me, app, iobj):
+	if iobj is me:
+		app.printToGUI("You kneel before the Goddess of the Storm, and offer your soul to Her. You feel Her claws closing around you.<br><br><i>YES, CHILD. COME TO ME. REST.</i><br><br>You feel a calm settling over you - peace, like nothing you've ever felt. It is beautiful. The Goddess of the Storm is beautiful, with her silver scales, and many eyes. You are Hers now, and you are glad. ")
+		global special_box_style
+		app.newBox(special_box_style)
+		kaur_ending.endGame(me, app)
+	else:
+		app.printToGUI("Nothing happens. ")
+goddess_abs.giveVerbDobj = giveGoddess
+
+def getGoddessDesc():
+	if goddess_abs.level == 1:
+		return "<i>Examine</i> the Goddess of the Storm? What would that even mean?"
+	elif goddess_abs.level == 2:
+		return "You don't see the Goddess, but you can feel <i>something</i>. You've been feeling a strange presence for a while now. "
+	elif goddess_abs.level == 2 and me.getOutermostRoom.room_group == cave_group:
+		return "You can still feel the Goddess of the Storm, but her presence is much weaker here in the caves. "
+	elif goddess_abs.level == 3:
+		return "The Goddess of the Storm rages through the sky above you. You need to move quickly."
+	else:
+		return "You can't see anything like that around here. "
+goddess_abs.describeThing("")
+goddess_abs.ignore_if_ambiguous = True
+goddess_abs.xdescribeThing("<<getGoddessDesc()>>")
+goddess_abs.cannotTakeMsg = "That is impossible. "
 goddess_abs.addSynonym("storm")
 goddess_abs.setAdjectives(["goddess", "of"])
 goddess_abs.verbose_name = "Goddess of the Storm"
@@ -60,6 +105,11 @@ previous_bad_offering = False
 
 def prayerAnswered(app):
 	parser.daemons.add(goddessStormDaemon)
+	square21.removeThing(villagers21)
+	square21.removeThing(woman21)
+	square21.removeThing(children21)
+	square21.removeThing(man21)
+	goddess_abs.level = 3
 	from intficpy.thing import things
 	from intficpy.room import rooms
 	from intficpy.actor import actors
@@ -242,11 +292,20 @@ patchkit.addSynonym("patch")
 patchkit.setAdjectives(["patch"])
 patchkit.describeThing("There is a patch kit here. ")
 patchkit.xdescribeThing("The patch kit contains everything you will need to repair your hull. ")
+def usePatchkit(me, app):
+	if me.getOutermostLocation()==shore6:
+		repairWithVerb.verbFunc(me, app, myboat, patchkit)
+	else:
+		app.printToGUI("There's nothing here that needs to be patched. ")
+	return False
+patchkit.useVerbDobj = usePatchkit
+
 shovel = Thing("shovel")
-def takeShovel(me, app):
-	#hints.closeNode(shovelHintNode)
-	return True
-shovel.getVerbDobj = takeShovel
+def useShovel(me, app):
+	digWithVerb.verbFunc(me, app, shovel)
+	return False
+shovel.useVerbDobj = useShovel
+
 shovel.xdescribeThing("The shovel is metal, with a wooden handle. ")
 compass = Thing("compass")
 compass.setAdjectives(["rusty"])
@@ -522,7 +581,9 @@ repairVerb.dscope = "near"
 def repairVerbFunc(me, app, dobj):
 	"""Redriect to repair with
 	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
-	if dobj==boat_power or dobj==boat_sail or dobj==myboat:
+	if dobj==boat_power:
+		app.printToGUI("Repairing the crystal is beyond your skills. ")
+	elif dobj==boat_sail or dobj==myboat:
 		parser.lastTurn.ambiguous = True
 		parser.lastTurn.dobj = dobj
 		parser.lastTurn.iobj = None
@@ -972,8 +1033,7 @@ buryWithVerb.verbFunc = buryWithVerbFunc
 # bury
 # transitive verb
 buryVerb = Verb("bury")
-buryVerb.addSynonym("fix")
-buryVerb.syntax = [["bury", "<dobj>"], ["fix", "<dobj>"]]
+buryVerb.syntax = [["bury", "<dobj>"]]
 buryVerb.hasDobj = True
 buryVerb.dscope = "inv"
 
@@ -1023,7 +1083,7 @@ prayToVerb.preposition = ["to"]
 def prayToVerbFunc(me, app, iobj):
 	"""Pray to a deity
 	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, iobj, a Thing """
-	if iobj != goddess_abs:
+	if iobj.known_ix != goddess_abs.known_ix:
 		app.printToGUI("There's no reason to pray to that. ")
 		return False
 	app.printToGUI("You stop for a moment, and pray to the Goddess of the Storm. You have a sense of something vast and inhuman watching you. ")
@@ -1048,6 +1108,7 @@ window0.lookThrough = window0LookThrough
 shack0.addThing(window0)
 
 arai = Actor("woman")
+arai.addSynonym("heretic")
 arai.describeThing("<<arai.capNameArticle(False)>> sits in a corner, reading a thick book. ")
 arai.xdescribeThing("<<arai.capNameArticle(True)>> is small and slight, with dark brown hair down to her knees. ")
 arai_hi1 = Topic("\"You're awake,\" <<arai.lowNameArticle(True)>> says. \"My name is Arai. I rescued you. The protective enchantment I placed on you is strong, but the Storm is stronger. You should keep your head down for now.\" ")
@@ -1061,13 +1122,14 @@ arai_book = Thing("book")
 arai_book.setAdjectives(["thick"])
 arai_book.invItem = False
 arai_book.describeThing("")
-arai_book.xdescribeThing("<<arai.capNameArticle>> is reading a thick book. ")
+arai_book.xdescribeThing("<<arai.capNameArticle(True)>> is reading a thick book. ")
 shack0.addThing(arai_book)
 arai_hi2 = Topic("\"Did you need something?\"  says <<arai.lowNameArticle(True)>> . ")
 arai.setHiTopics(arai_hi1, arai_hi2)
 arai_warning2 = Topic("\"Just don't drink the Kaur, whatever you do,\" says <<arai.lowNameArticle(True)>> .")
 # INTRO
 arai_how = SpecialTopic("ask how you got here", "\"I brought you here,\" says Arai. \"The Storm nearly took you, but I intervened. You're safe now.\" ")
+arai_how.addAlternatePhrasing("ask how did i you get got here")
 def araiHow(app, suggest=True):
 	app.printToGUI(arai_how.text)
 	arai.removeSpecialTopic(arai_how)
@@ -1133,6 +1195,7 @@ def part1EndCut(app):
 	arai.default_topic = arai_p2_default1
 	arai.setHiTopics(None, None)
 	arai.printSuggestions(app)
+	goddess_abs.level = 2
 	#hints.closeNode(fixBoatHintNode)
 
 arai_p2_default1 = "\"Will you help me then?\" Arai asks. \"Will you - \" she drops to a whisper here. \"Will you banish the Goddess of the Storm?\""
@@ -1140,6 +1203,7 @@ arai_p2_default2 = "\"Have you been down in the caverns yet?\" Arai asks. \"The 
 arai_p2_default3 = "\"Made any progress?\" Arai asks. \"Anything I can help you with?\""
 
 arai_p2_plan = SpecialTopic("ask what her plan is", "Arai glances around. \"Remember the stone you took from my house?\" she says softly. \"It's the seat of the Storm's power in this world. Her domain is the sky. If we bury her vessel deep enough, she won't be able to exist in this world. She'll disappear, and this island - well, <i>we'll</i> be free. You'll have to go down to the bottom of the caves. I've cleared a lot of the traps and curses out, but what I'm asking you to do is still not exactly safe. Unfortunately, it's the only way you'll get off this island alive. Will you do it?\" ")
+arai_p2_plan.addAlternatePhrasing("ask what is her your arais plan")
 def araiP2Plan(app, suggest=True):
 	app.printToGUI(arai_p2_plan.text)
 	arai.removeSpecialTopic(arai_p2_plan)
@@ -1173,6 +1237,7 @@ def araiP2Plan4(app, suggest=True):
 		arai.printSuggestions(app)
 arai_p2_plan4.func = araiP2Plan4
 arai_p2_trust = SpecialTopic("tell her you don't trust her", "\"Fair enough,\" Arai says. \"All the same, I hope you'll at least consider my plan.\" ")
+arai_p2_trust.addAlternatePhrasing("i don't trust her you")
 def araiP2Trust(app, suggest=True):
 	app.printToGUI(arai_p2_trust.text)
 	arai.removeSpecialTopic(arai_p2_trust)
@@ -1266,7 +1331,9 @@ def opalTake(me, app):
 opal.getVerbDobj = opalTake
 def opalGiveShow(me, app, dobj):
 	global special_box_style
-	if dobj==arai:
+	if dobj.ix==goddess_abs.ix:
+		app.printToGUI("Nothing happens. ")
+	elif dobj==arai:
 		app.printToGUI("\"Put that away!\" <<arai.lowNameArticle(True)>> hisses. ")
 		return False
 	elif dobj==blessed22:
@@ -1333,9 +1400,11 @@ rocks2 = Thing("rocks")
 #shore2.addThing(pickaxe)
 rocks2.setAdjectives(["large", "sharp", "west"])
 rocks2.addSynonym("boulders")
+rocks2.addSynonym("boulder")
+rocks2.addSynonym("rock")
 rocks2.verbose_name = "large rocks"
 rocks2.describeThing("Large rocks block the way to the west. ")
-rocks2.xdescribeThing("Large rokcs block the way to the west. ")
+rocks2.xdescribeThing("Large rocks block the way to the west. ")
 rocks2.invItem = False
 rock_barriers.append(rocks2)
 def rocks2Break(me, app):
@@ -1435,7 +1504,7 @@ shore2w.s_false_msg = "The forest is too thick to go south. You can only travel 
 shore2w.sw_false_msg = "The forest is too thick to go southwest. You can only travel east from here. "
 shore2w.w_false_msg = "The forest is too thick to go west. You can only travel east from here. "
 shore2w.nw_false_msg = "There is only ocean to the northwest. It probably isn't wise to try and cross it without a boat. You can only travel east from here."
-arai_journal = Book("notebook", "The first handwritten page bears the title, \"<i>Working Journal of Arai of Storm Island, Entries 314 to 322\"<br><br><b>Entry 314:</b><br> My years of research are finally paying off. I belive I have found a way to banish the Storm. It seems, hundreds of years ago, the sorcerers of this land brought Her into our world, in hopes of controlling Her power. They did this by enchanting a certain stone - an opal, the legends say - so that it might serve as a portal by which She could enter. They say that in thanks for releasing Her, the Storm has since protected the people of this island, though She does not need us. Protected! Hah. She has controlled and enslaved us. The more time I spend free of her clutches, the more clear becomes. My people fade slowly as they age, their minds and personalities gradually becoming one with Her, until they are nothing but puppets, or empty husks, breathing but unmoving. My people become lost when they step a few metres from the path. My people are addicted, all of them, to a drink that saps their life, their motivation, and their very selves. She is not a blessing. She is not our protector. She is a tyrant, and I have discovered how to defeat her, at long last. When buried deep in the earth, the opal will lose its power. Its enchantment will fade, and She will lose Her ability to manifest Herself in this world. We will be free. All of us. We will be free, and I will be able to return to my family, at long last. <<m>> <i><br><br><b>Entry 315:</b><br>I have located the opal. The priests keep it in a box, in the Hall of the Blessed. I am going to steal it. It shouldn't be difficult. Nobody ever steals here, so there aren't many protections in place. I will report back tomorrow. Wish me luck. <br><br><b>Entry 316</b><br>I have the opal. No one saw me take it. I should be fine, as long as I keep it hidden. Since the opal's disappearance, She has seized control of any follower who so much as sees something that looks like it. It doesn't matter. I just have to be smart. Moving on to the next phase of my plan. Will report back. <br><br><b>Entry 316:</b><br>I have been exploring the caves. The lens I enchanted a year ago has come in very handy. I think if I can get to the bottom, it will be deep enough. Cracked the code for the east room today. <br><br><b>Entry 317:</b><br> Entered the west room today. Found some disappointing news. I've been oversimplifying things a little. Turns out, if I just bury the opal, everyone on this island will die, because of their connection to the Storm. This is going to slow me down a bit, but I'll figure it out. If I broke out, surely I can figure out how to get the rest of us free. Will report back. <<m>> <i><br><br><b>Entry 318:</b> Feeling a bit hopeless. I managed to convince a friend to stop drinking the Kaur. She's the only one so far. I was hoping she would be an example that others would follow, but things are not going well. Her withdrawal so far has been a lot worse than mine. I guess I weaned myself off over a long time. I didn't realise how much difference it would make. She's been screaming, and trembing, and crying. Last night, her father brought her Kaur, and she drank. She was pretty mad at me, once she was lucid again. I don't think she'll trust me anymore. I don't think anyone's going to trust me anymore. I'll have to act without their cooperation. <br><br><b>Entry 319:</b><br> I used to put up an energetic shield, when I wanted time away from the Storm. When my connection to Her finally broke, I was shielded. I'd also been off Kaur for a month, but it was the shield that did it, I think. I'm going to try shielding some of the villagers. Wish me luck. <br><br><b>Entry 320:</b><br>I can't do this. I don't think there's any way. I held four villagers within my shield. They cried, and screamed, and prayed to be freed. After an hour, I saw one of their connections break - that of a young boy. I removed the shield, to see what would happen. Within seconds, the Storm struck him down. He was 10 years old. No one saw what I did, but I'm drowning in guilt. I give up. I give up. I have half a mind to drink the Kaur myself, and beg the Goddess for the Blessed Peace. <<m>> <i><br><br><b>Entry 321</b><br>She took another boat today. It's happening more and more often. I think her reach is growing. I don't know what's out there, but maybe the rest of the world can be saved. I know for sure Her devoted can't. I'm going to banish the Goddess of the Storm, even if everyone on this island dies because of me. <br><br><b>Entry 322</b><br>I can't do it. I got into the west room on the bottom level. I can't. I can't. I know it's just a curse - just an illusion, but it's too much for me. I'm never going back there. I lost control of my magic, down in the caves - caused a minor cave in. I wish I'd been crushed, so I wouldn't have to decide whether to live this useless life, or die for my shame. I will remain on this island until I die, and the Storm will rage through the world, destorying everything in Her path. I have failed. I have failed. I have failed. </i><br><br> You have reached the end of the notebook. ")
+arai_journal = Book("notebook", "The first handwritten page bears the title, \"<i>Working Journal of Arai of Storm Island, Entries 314 to 322\"<br><br><b>Entry 314:</b><br> My years of research are finally paying off. I believe I have found a way to banish the Storm. It seems, hundreds of years ago, the sorcerers of this land brought Her into our world, in hopes of controlling Her power. They did this by enchanting a certain stone - an opal, the legends say - so that it might serve as a portal by which She could enter. They say that in thanks for releasing Her, the Storm has since protected the people of this island, though She does not need us. Protected! Hah. She has controlled and enslaved us. The more time I spend free of her clutches, the more clear it becomes. My people fade slowly as they age, their minds and personalities gradually becoming one with Her, until they are nothing but puppets, or empty husks, breathing but unmoving. My people become lost when they step a few metres from the path. My people are addicted, all of them, to a drink that saps their life, their motivation, and their very selves. She is not a blessing. She is not our protector. She is a tyrant, and I have discovered how to defeat her, at long last. When buried deep in the earth, the opal will lose its power. Its enchantment will fade, and She will lose Her ability to manifest Herself in this world. We will be free. All of us. We will be free, and I will be able to return to my family, at long last. <<m>> <i><br><br><b>Entry 315:</b><br>I have located the opal. The priests keep it in a box, in the Hall of the Blessed. I am going to steal it. It shouldn't be difficult. Nobody ever steals here, so there aren't many protections in place. I will report back tomorrow. Wish me luck. <br><br><b>Entry 316</b><br>I have the opal. No one saw me take it. I should be fine, as long as I keep it hidden. Since the opal's disappearance, She has seized control of any follower who so much as sees something that looks like it. It doesn't matter. I just have to be smart. Moving on to the next phase of my plan. Will report back. <br><br><b>Entry 316:</b><br>I have been exploring the caves. The lens I enchanted a year ago has come in very handy. I think if I can get to the bottom, it will be deep enough. Cracked the code for the east room today. <br><br><b>Entry 317:</b><br> Entered the west room today. Found some disappointing news. I've been oversimplifying things a little. Turns out, if I just bury the opal, everyone on this island will die, because of their connection to the Storm. This is going to slow me down a bit, but I'll figure it out. If I broke out, surely I can figure out how to get the rest of us free. Will report back. <<m>> <i><br><br><b>Entry 318:</b> Feeling a bit hopeless. I managed to convince a friend to stop drinking the Kaur. She's the only one so far. I was hoping she would be an example that others would follow, but things are not going well. Her withdrawal so far has been a lot worse than mine. I guess I weaned myself off over a long time. I didn't realise how much difference it would make. She's been screaming, and trembing, and crying. Last night, her father brought her Kaur, and she drank. She was pretty mad at me, once she was lucid again. I don't think she'll trust me anymore. I don't think anyone's going to trust me anymore. I'll have to act without their cooperation. <br><br><b>Entry 319:</b><br> I used to put up an energetic shield, when I wanted time away from the Storm. When my connection to Her finally broke, I was shielded. I'd also been off Kaur for a month, but it was the shield that did it, I think. I'm going to try shielding some of the villagers. Wish me luck. <br><br><b>Entry 320:</b><br>I can't do this. I don't think there's any way. I held four villagers within my shield. They cried, and screamed, and prayed to be freed. After an hour, I saw one of their connections break - that of a young boy. I removed the shield, to see what would happen. Within seconds, the Storm struck him down. He was 10 years old. No one saw what I did, but I'm drowning in guilt. I give up. I give up. I have half a mind to drink the Kaur myself, and beg the Goddess for the Blessed Peace. <<m>> <i><br><br><b>Entry 321</b><br>She took another boat today. It's happening more and more often. I think her reach is growing. I don't know what's out there, but maybe the rest of the world can be saved. I know for sure Her devoted can't. I'm going to banish the Goddess of the Storm, even if everyone on this island dies because of me. <br><br><b>Entry 322</b><br>I can't do it. I got into the west room on the bottom level. I can't. I can't. I know it's just a curse - just an illusion, but it's too much for me. I'm never going back there. I lost control of my magic, down in the caves - caused a minor cave in. I wish I'd been crushed, so I wouldn't have to decide whether to live this useless life, or die for my shame. I will remain on this island until I die, and the Storm will rage through the world, destorying everything in Her path. I have failed. I have failed. I have failed. </i><br><br> You have reached the end of the notebook. ")
 arai_journal.addSynonym("book")
 arai_journal.addSynonym("journal")
 arai_journal.setAdjectives(["leather", "bound", "note", "arais"])
@@ -1764,6 +1833,7 @@ for item in smallCave10.walls:
 forest9.entrance = smallCaveConnector
 smallCave10.exit = smallCaveConnector
 copper1 = Thing("coin")
+copper1.size = 2
 copper1.setAdjectives(["small", "copper"])
 copper1.verbose_name = "copper coin"
 copper1.describeThing("On the ground is a copper coin. ")
@@ -2086,11 +2156,13 @@ forestThing17.describeThing("")
 forestThing17.xdescribeThing("The trees are thick, blocking out almost all light. Beneath them, a tangle of undergrowth makes travel impossible. It looks like you can get through to the east. ")
 shore17.addThing(forestThing17)
 daughter = Actor("woman")
+daughter.addSynonym("girl")
 daughter.setAdjectives(["young", "lost"])
 daughter.verbose_name = "young woman"
 daughter.describeThing("A young woman in a green dress stands here. ")
 daughter.xdescribeThing("<<daughter.capNameArticle(True)>> is tall, with short black hair. She is wearing a pale green dress. ")
 daughter_father = SpecialTopic("ask if she's the boatmaker's daughter", "<<daughter.capNameArticle(True)>> looks at you directly for the first time. \"My father,\" she says, a look of instense concentration on her face. \"He'll be missing me. I must get back to him.\" She pauses, blinking a few times, as if to clear her eyes. \"You aren't lost, are you? Somehow, you've managed to stray from the path without losing your way . . . . What a strange power  . . . you have.\" She trails off. After a long silence, she takes a deep breath, and looks you directly in the eye. \"Lead me,\" she says. \"Lead me home. Please.\" ")
+daughter_father.addAlternatePhrasing("ask if are you is she the boatmakers boat makers daughter")
 def daughterFather(app, suggest=True):
 	app.printToGUI(daughter_father.text)
 	daughter.removeSpecialTopic(daughter_father)
@@ -2101,6 +2173,19 @@ def daughterFather(app, suggest=True):
 daughter_father.func = daughterFather
 daughter.default_topic = "<<daughter.capNameArticle(True)>> doesn't seem to hear, or even see you. \"I've strayed from the path,\" she mutters. \"I am lost. I am forever lost. Oh, Goddess, let me die swiftly.\""
 shore17.addThing(daughter)
+daughter_composites = [Thing("hair"), Thing("dress")]
+daughter_composites[0].setAdjectives(["young", "tanis", "womans", "girls", "short", "black"])
+daughter_composites[1].setAdjectives(["young", "tanis", "womans", "girls", "pale", "green"])
+daughter_composites[0].verbose_name = "the young woman's hair"
+daughter_composites[1].verbose_name = "the young woman's dress"
+daughter_composites[0].xdescribeThing("<<daughter.capNameArticle(True)>> 's hair is short and black. ")
+daughter_composites[1].xdescribeThing("<<daughter.capNameArticle(True)>> 's dress is pale green. ")
+for item in daughter_composites:
+	item.describeThing("")
+	daughter.addComposite(item)
+daughter_composites[0].cannotTakeMsg = "You can't take someone's hair! "
+daughter_composites[1].cannotTakeMsg = "You can't take someone's clothing! "
+
 daughter_default2 = "\"Please take me to my father,\" says <<daughter.lowNameArticle(True)>> . \"He will be missing me.\" "
 daughter_default3 = "\"Thank you for your help,\" says <<daughter.lowNameArticle(True)>> . \"Now, I need some time to rest.\" "
 
@@ -2110,6 +2195,7 @@ def boatmakerBoard(app, suggest=True):
 	app.printToGUI(boatmaker_board_special.text)
 	me.addThing(woodboard)
 	app.printToGUI("(Received: " + woodboard.verbose_name + ")")
+	boatmaker.removeSpecialTopic(boatmaker_board_special)
 boatmaker_board_special.func = boatmakerBoard
 
 def boatmakerDefault2(app, suggest=True):
@@ -2181,10 +2267,10 @@ market19.ceiling.xdescribeThing("<<skyState()>>")
 market19.storm_desc = "The market square is mostly abandoned. Roads from the square lead northwest, toward the edge of town, and east. There is a small, wooden building to the south. "
 road18.southeast = market19
 market19.northwest = road18
-market19.sw_false_msg = "There is only farmland to the southwest. You can go northeast, east, or south. "
+market19.sw_false_msg = "There is only farmland to the southwest. You can go northwest, east, or south. "
 market19.ne_false_msg = "You can only go northwest, east, or south from here. "
-market19.w_false_msg = "There is only farmland to the west. You can go northeast, east, or south.  "
-market19.n_false_msg = "The forest is too thick to go far in that direction. You can go northeast, east, or south. "
+market19.w_false_msg = "There is only farmland to the west. You can go northwest, east, or south.  "
+market19.n_false_msg = "The forest is too thick to go far in that direction. You can go northwest, east, or south. "
 market19.floor.addSynonym("square")
 market19.floor.addSynonym("cobblestones")
 market19.floor.setAdjectives(["cobblestone"])
@@ -2212,8 +2298,9 @@ stallThing19.setAdjectives(["market"])
 stallThing19.invItem = False
 stallThing19.describeThing("")
 stallThing19.xdescribeThing("Bright fabrics and sewing notions hang from the market stall. ")
-stallThing19.xdescribeThing("The fabrics that hangs from the market stall are soaked with rainwater. ")
+stallThing19.storm_desc = "The fabrics that hangs from the market stall are soaked with rainwater. "
 sewingNotions19 = Thing("notions")
+sewingNotions19.hasArticle = False
 sewingNotions19.addSynonym("needles")
 sewingNotions19.addSynonym("thread")
 sewingNotions19.addSynonym("buttons")
@@ -2341,10 +2428,12 @@ tables20.setOnVerbIobj = pub_tables_set
 villagers20 = Actor("villagers")
 villagers20.addSynonym("people")
 villagers20.addSynonym("villager")
+villagers20.setAdjectives(["passed", "out"])
 villagers20.describeThing("")
 villagers20.xdescribeThing("The villagers are clustered around two tables. A few are passed out. ")
 villagers20.storm_xdesc = "The villagers look frightened. "
 pub20.addThing(villagers20)
+villagers20.default_topic = "A few of the more alert villagers look up at you. You get a smile or two, and a few sleepy nods, but no one speaks. "
 kaur_offering_topic = SpecialTopic("ask for Kaur to make an offering", "Ket the Picker's face lights up. \"Of course!\" she says. \"Here!\" She hands you a cup of Kaur. ")
 def kaurOfferingTopic(app, suggest=True):
 	app.printToGUI(kaur_offering_topic.text)
@@ -2408,7 +2497,7 @@ def go_in_tower(me, app):
 	import intficpy.travel as travel
 	travel.travelS(me, app)
 towerThing21.climbInVerbDobj = go_in_tower
-villagers21 = Thing("villagers")
+villagers21 = Actor("villagers")
 villagers21.addSynonym("people")
 villagers21.invItem = False
 def squareVillagersFunc():
@@ -2418,7 +2507,35 @@ villagers21.describeThing("<<squareVillagersFunc()>>")
 villagers21.xdescribeThing("<<squareVillagersFunc()>>")
 villagers21.storm_desc = "The once busy square is abandoned. "
 villagers21.storm_xdesc = "There's no one here. "
+villagers21.default_topic = "The villagers appear too occupied to pay you much heed. "
 square21.addThing(villagers21)
+children21 = Actor("children")
+children21.setAdjectives(["four"])
+children21.ignore_if_ambiguous = True
+children21.describeThing("")
+children21.xdescribeThing("The children have already left.")
+children21.default_topic = "The children have already left."
+square21.addThing(children21)
+woman21 = Actor("woman")
+woman21.ignore_if_ambiguous = True
+woman21.addSynonym("baby")
+woman21.setAdjectives(["woman", "with", "baby"])
+woman21.verbose_name = "woman with a baby"
+woman21.describeThing("")
+woman21.xdescribeThing("The woman with a baby has already left the square. ")
+woman21.default_topic = "The woman with a baby has already left. "
+square21.addThing(woman21)
+man21 = Actor("man")
+man21.ignore_if_ambiguous = True
+man21.addSynonym("barrow")
+man21.addSynonym("fruits")
+man21.addSynonym("fruit")
+man21.setAdjectives(["man", "with", "barrow", "of", "fruit", "fruits"])
+man21.verbose_name = "man with a barrow"
+man21.describeThing("")
+man21.xdescribeThing("The man with the barrow isn't here anymore.")
+man21.default_topic = "The man with the barrow isn't here anymore. "
+square21.addThing(man21)
 
 # HALL 22 (Hall of the Blessed)
 hall22 = Room("Ornately Built Hall", "The building is large, and the ceiling, high. ")
@@ -2447,7 +2564,7 @@ blessed22.describeThing("Sitting cross-legged in a line against the back wall ar
 blessed22.storm_desc = "Seven people in white robes lie scattered on the floor of the Hall, faces frozen in unblinking, indentical agony. They look dead. "
 blessed22.storm_desc = "Seven people in white robes lie scattered on the floor of the Hall, faces frozen in unblinking, indentical agony. They look dead. "
 blessed22.xdescribeThing("As far as you can tell, the seven are made up of three men, and four women, though their identical dress, and close-shaven hair makes it difficult to discern. Most of them seem to be in their thirties, with one older, and one younger. The seven cock their heads in unison, narrowing their eyes as you stare at them. ")
-blessed_default = Topic("\"You are not of this land,\" chorus the white robed people, their voices flat. They move in perfect unison. \"The Heretic has protected you for now, but her power is nothing compared to Ours. You will give yourself to Our Goddess, or you will die. Do not waste Our time.\" <<goddess_abs.makeKnown(me)>>")
+blessed_default = Topic("\"You are not of this land,\" chorus the white robed people, their voices flat. They move in perfect unison. \"The Heretic has protected you for now, but her power is nothing compared to Ours. You will give yourself to Our Goddess, or you will die. Do not waste Our time.\" <<goddess_abs.makeKnown(me)>><<goddess_abs.level=1>>")
 blessed_crystal = Topic("\"We do not care about your foreign technology,\" says the youngest. The others join in as she continues. \"We have tolerated you so far, but you will not last long if you disturb Our peace. We see through many sets of eyes. We can strike you down in an instant. Do not forget it.\"")
 blessed_crystal_special = SpecialTopic("ask about your power crystal", blessed_crystal.text)
 blessed22.addTopic("asktell", blessed_crystal, boat_power)
@@ -2482,12 +2599,17 @@ torches23.addSynonym("fixtures")
 torches23.describeThing("Two torches light the room from fixtures on opposite walls. ")
 torches23.xdescribeThing("Two torches light the room from fixtures on opposite walls. ")
 tower23.addThing(torches23)
-guard23= Actor("guard")
+guard23 = Actor("guard")
 guard23.addSynonym("villager")
 guard23.describeThing("A tired looking guard glares at you from behind a wooden desk. ")
 guard23.storm_desc = "A lone guard is slumped dead in a corner. "
 guard23.storm_xdesc = "A lone guard is slumped dead in a corner. "
 guard23.xdescribeThing("The guard wears a peaked cap over his dark hair. He narrows his eyes as you stare at him. ")
+meet_guard = Topic("The guard looks up at you. \"You must be Arai's pet foreigner. That fool woman will come to no good end. I would have let you die, had I found you. The Goddess needs to eat.\"")
+guard23.setHiTopics(meet_guard, None)
+guard23.default_topic = "The guard scowls at you. \"Don't bother me.\""
+guard_hermit = Topic("The guard is dead. ")
+guard23.storm_hermit_topic = guard_hermit
 tower23.addThing(guard23)
 
 # ROAD 24 (Cobblestone Road, North Bend)
@@ -2547,6 +2669,7 @@ patients25 = Actor("patients")
 patients25.addSynonym("people")
 patients25.addSynonym("person")
 patients25.addSynonym("patient")
+patients25.addSynonym("children")
 patients25.describeThing("")
 patients25.xdescribeThing("The people in the beds stare up at the ceiling, breathing, and blinking, but otherwise never stirring. ")
 patients25.storm_xdesc = "All of these people appear dead. "
@@ -2562,6 +2685,19 @@ nurse25.storm_desc = "The nurse lies on the ground, curled in a ball, her face w
 nurse25.storm_xdesc = "The nurse lies on the ground, curled in a ball, her face wet from tears, but blank. Her eyes drift to look at you, but you don't think she really sees you. "
 nurse25.xdescribeThing("The nurse is a young woman, with short brown hair. ")
 hall25.addThing(nurse25)
+nurse_hi = Topic("\"Oh! Hello,\" says the nurse. \"You must be the foreigner I've heard about. You were staying in Arai's shack, by the shore, right? I hope Arai's treating you all right. She means well, but she's not quite right. Doubtless you've noticed. Just be careful.\"")
+nurse25.default_topic = "\"Hello,\" says the nurse. \"Did you need something?\""
+nurse25.setHiTopics(nurse_hi, None)
+nurse_knows_arai = SpecialTopic("ask if she knows Arai well", "The nurse sighs. \"I used to know her,\" she says. \"We used to be very close. About six years ago, she started acting strangely. She was saying all manner of bizarre things - that we were all being mind controlled, that the Goddess was sapping our life, that the Blessed were out to get her. She stopped praying with us. She stopped drinking with us. For a long time, I kept trying to convince her, to guide her back to the Goddess. Eventually, with all that time spent listening to her ravings, I started to believe what Arai was saying. I nearly died, acting on her advice. She meant well - she's not a bad person - but she's not a safe person, either. She moved out of the village, after that. I haven't spoken to her since.\"")
+nurse_arai = Topic(nurse_knows_arai.text)
+nurse_knows_arai.addAlternatePhrasing("ask do you know arai well")
+nurse25.addSpecialTopic(nurse_knows_arai)
+nurse25.addTopic("asktell", nurse_arai, arai)
+nurse_knows_arai = SpecialTopic("ask if she knows Arai well", "The nurse sighs. \"I used to know her,\" she says. \"We used to be very close. About six years ago, she started acting strangely. She was saying all manner of bizarre things - that we were all being mind controlled, that the Goddess was sapping our life, that the Blessed were out to get her. She stopped praying with us. She stopped drinking with us. For a long time, I kept trying to convince her, to guide her back to the Goddess. Eventually, with all that time spent listening to her ravings, I started to believe what Arai was saying. I nearly died, acting on her advice. She meant well - she's not a bad person - but she's not a safe person, either. She moved out of the village, after that. I haven't spoken to her since.\"")
+nurse_leave_island = SpecialTopic("ask about travel to and from the island", "\"Nobody leaves,\" the nurse says. \"But those of us whom the Goddess protects can sail safely in the waters around the island. The Goddess will protect you, too, if you give yourself to Her. You'll be safe then.\"")
+nurse25.addSpecialTopic(nurse_leave_island)
+nurse_hermit = Topic("The nurse does not respond. ")
+nurse25.storm_hermit_topic = nurse_hermit
 
 # YARD 26 (Shipyard)
 yard26 = OutdoorRoom("Shipyard", "A path leads through the shipyard, from town to the west, to the harbour to the northeast. ")
@@ -2627,6 +2763,9 @@ def boatmakerDaughter(app, suggest=True):
 	##hints.setNode(findDaughterHintNode)
 	#hints.closeNode(talkBoatmakerHintNode)
 	daughter.addSpecialTopic(daughter_father)
+	if daughter.ix in me.knows_about:
+		boatmaker.addSpecialTopic(boatmaker_daughter2_special)
+	boatmaker.printSuggestions(app)
 boatmaker_daughter_special = SpecialTopic("ask about his missing daughter", boatmaker_daughter.text)
 boatmaker_daughter_special.func = boatmakerDaughter
 boatmaker_daughter2_special = SpecialTopic("tell him you've found his daughter", "\"What?\" <<boatmaker.lowNameArticle(True)>> cries in horror. \"She's off the path? And you came back without her? Please, Outsider, don't be so cruel. You appear to have the power to move without Her guidance, but we do not. Tani will die out there if you don't go back for her. I'll reward you! I'll be forever in your debt! Just bring my daughter home.\"")
@@ -2645,7 +2784,7 @@ fence26.xdescribeThing("A wooden fence encircles the shipyard. ")
 yard26.addThing(fence26)
 
 # ROAD 27 (Cobblestone Road, End)
-road27  = OutdoorRoom("Cobblestone Road, End", "The cobblestone road ends here. Dirt paths lead north, into the forest, and east, toward shore. ")
+road27  = OutdoorRoom("Cobblestone Road, End", "The cobblestone road ends here. Dirt paths lead north, into the forest, east, toward shore, and south, back toward the town. ")
 road27.storm_desc = "The cobblestone road ends here. The dirt paths that lead north and east have become rivers of mud. "
 road27.ceiling.xdescribeThing("<<skyState()>>")
 road27.south = road24
@@ -2756,6 +2895,7 @@ def pickerCompass(app):
 	picker.setHermitTopic(picker_hermit1)
 	arai.setHermitTopic(arai_warning2)
 	goddess_abs.makeKnown(me)
+	goddess_abs.level = 1
 	##hints.setNode(meetKetHintNode)
 	#hints.closeNode(talkPickerHintNode)
 	if storm_abs.known_ix in me.knows_about:
@@ -3202,7 +3342,7 @@ cave1.addThing(pedestal1)
 pedestal1.invItem = False
 pedestal1.addComposite(dial1)
 pedestal1.describeThing("In the middle of the room is a stone pedestal. ")
-pedestal1.xdescribeThing("In the middle of the room is a stone pedestal. <<#hints.closeNode(l1HintNode)>> ")
+pedestal1.xdescribeThing("In the middle of the room is a stone pedestal. ")
 # c1 -> c3 = combination 3, 6, 15, 28 (numbers between 0 and 30)
 
 # CAVE 2 (Library)
@@ -3249,7 +3389,10 @@ cave3.addThing(l2key)
 ### LOWER LEVEL ###
 # CAVE 4 (Lower Level, contains gold ingot)
 # CAVE 4_2 (chasm)
-cave4_2 = Room("Behind the Door, on the Precipice of a Chasm ", "You are on a narrow section of ground, at the edge of deep chasm stretching the width of the cavern. <<boatmaker.addSpecialTopic(boatmaker_board_special)>> ")
+cave4_2 = Room("Behind the Door, on the Precipice of a Chasm ", "You are on a narrow section of ground, at the edge of deep chasm stretching the width of the cavern. You can see the ground on the other side of the chasm, to the south. ")
+def chasmDiscover(me, app):
+	boatmaker.addSpecialTopic(boatmaker_board_special)
+cave4_2.onDiscover = chasmDiscover
 cave4_2.dark = True
 chasm4_2 = Thing("chasm")
 chasm4_2.invItem = False
@@ -3313,10 +3456,12 @@ cave4.north = cave4_2
 cave4.north_msg = "You carefully cross your improvised bridge. "
 cave4.addThing(goldingot)
 rocks4 = Thing("rocks")
+rocks4.addSynonym("rock")
 rocks4.setAdjectives(["large", "fallen", "east"])
 rocks4.addSynonym("boulders")
 rocks4.verbose_name = "fallen rocks"
 rocks4.describeThing("Fallen rocks block the way to the east. ")
+rocks4.xdescribeThing("Fallen rocks block the way to the east. ")
 rocks4.invItem = False
 rock_barriers.append(rocks4)
 def rocks4Break(me, app):
@@ -3597,6 +3742,11 @@ depths_lock = Lock(True, depthskey)
 depths_entrance.setLock(depths_lock)
 
 cavegroup.setMembers([cave0, cave1, cave2, cave3, cave4, cave4_2, cave5, cave6, cave7, cave_LL_ante, depths_ante])
+
+for key, room in rooms.items():
+	g = goddess_abs.copyThing()
+	if isinstance(room, Room):
+		room.addThing(g) 
 
 # FUNCTIONS
 def opening(a):
