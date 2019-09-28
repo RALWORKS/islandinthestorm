@@ -24,8 +24,9 @@ gui.Prelim(__name__)
 
 parser.aboutGame.setInfo("ISLAND IN THE STORM", "JSMaika")
 parser.aboutGame.desc = "A storm comes out of nowhere as you are sailing through uncharted waters, causing you to crash on an isolated island. Something isn't right here. There's something odd about the islanders, and you can't shake the feeling that you're being watched. Can you uncover the secrets of the island and escape alive? "
-parser.aboutGame.game_instructions = "<i>Island in the Storm</i> is a fantasy puzzle game with mystery elements. The objective of the game is to escape the island. In order to do this, you will need to explore, solve puzzles and interact with islanders. A few hints:<br><br>While the game accepts conversation commands in the classic IF ask/tell/give/show format, all conversation topics can be reached through TALK TO. To talk about the suggested topics (listed in parentheses under the character's response), type out all or part of the suggestion. For instance, you could accept the suggestion, \"You could ask what the woman does for a living,\" by typing ASK WHAT THE WOMAN DOES FOR A LIVING. Unless there were other suggestions that used the word \"living\", you could also just type LIVING. Suggestions are only available immediately after they are given. <br><br>When travelling through dark areas, bring your light crystal. It recharges in full light. At full charge, it will last 50 turns. Be sure not to let it die while you're in the dark.<br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt<br><br>Good luck!"
+parser.aboutGame.game_instructions = "<i>Island in the Storm</i> is a fantasy puzzle game with mystery elements. The objective of the game is to escape the island. In order to do this, you will need to explore, solve puzzles and interact with islanders. A few hints:<br><br>While the game accepts conversation commands in the classic interactive fiction ask/tell/give/show format, all conversation topics can be reached through TALK TO. To talk about the suggested topics (listed in parentheses under the character's response), type out all or part of the suggestion. For instance, you could accept the suggestion, \"You could ask what the woman does for a living,\" by typing ASK WHAT THE WOMAN DOES FOR A LIVING. Unless there were other suggestions that used the word \"living\", you could also just type LIVING. Suggestions are only available immediately after they are given. <br><br>When travelling through dark areas, bring your light crystal. It recharges in full light. At full charge, it will last 50 turns. Be sure not to let it die while you're in the dark.<br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt<br><br>Good luck!"
 parser.aboutGame.help_msg = "<i>Island in the Storm</i> is a fantasy puzzle game. To escape alive, you'll need to explore the island, talk with the locals, and uncover the truth. <br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt"
+parser.aboutGame.betaTesterCredit = "Thank you to beta testers <br>Michael Csokas, <br>Rosa,<br> and Shaun"
 # rooms
 # SHACK 0
 shack0 = Room("Shack interior", "You are in wooden shack. Light filters in through a cracked, dirty window. ")
@@ -57,6 +58,7 @@ bed0.addComposite(underbed0)
 goddess_abs = Actor("goddess")
 goddess_abs.describeThing("")
 goddess_abs.level = 0
+goddess_abs.cannot_interact_msg = "The Goddess of the Storm isn't a physical being you can interact with. "
 
 def buyGoddess(me, app, iobj):
 	app.printToGUI("That is impossible. ")
@@ -1119,6 +1121,7 @@ def araiHi1(app, suggest=True):
 		arai.printSuggestions(app)
 arai_hi1.func = araiHi1
 arai_book = Thing("book")
+arai_book.read_desc = "You can't see much of the text over <<arai.lowNameArticle(True)>> 's shoulder. "
 arai_book.setAdjectives(["thick"])
 arai_book.invItem = False
 arai_book.describeThing("")
@@ -1340,8 +1343,14 @@ def opalGiveShow(me, app, dobj):
 		app.printToGUI("You hold out the opal for the seven to see. For a moment, it appears they haven't noticed, but you have a sense of growing tension. You realize they've been staring at you, all of them, almost unblinking - no, literally unblinking. You glance over your shoulder to find that two of them are now behind you. When did that happen? You've been watching them the whole time. <br><br>As you turn to look back at the others, all seven step forward in unison. Their faces are empty, and impossibly still. They step forward again. You are surrounded. You need to escape. You bolt, running between the youngest and the oldest, in hopes that they will be the weakest link. The tiny girl grabs you by the wrist as you try to slip past, not even turning to look as she does so. Her grip is tight. It <i>hurts</i>, and you're no stranger to pain. <br><br>You pull against her. Your heart pounds. Her small arm rotates impossibly behind her back, but she does not budge. It is as if her humanity were simply a pretence, now abandoned. It is if <i>the restrictions of physics</i> were merely a pretense. The others gather round you once more. Each of them places a hand on your body. You try to pull away, but there is nowhere to go. Constricted by the girl's grip, your arm starts to go numb. <br><br>You fight to free yourself, but you are weakening. It must be the exhaustion of trying to resist the impossible strength of the seven - but no, that's not it. There's something else. Your heart has slowed, and the tingling has spread to most of your body. You're struggling to keep your eyes open. The life is being sucked out of you. You need to act fast - you need a plan - but your mind is dimming, along with your body. You need to get out of here. You need to get out of here. You need - ")
 	elif dobj==villagers20:
 		app.printToGUI("You hold out the opal for the others in the pub to see. Everyone turns to stare stares at it. All at once, their faces go slack. A young woman stands up from her table. She pauses for a moment, before leaping at you, and tackling you to the ground. The others look on, silently. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
-	elif dobj in [vendor, picker]:
+	elif dobj==villagers21:
+		app.printToGUI("You hold out the opal for the villagers to see. Everyone turns to stare stares at it. All at once, their faces go slack. A young man takes a few steps toward you. He pauses for a moment, before leaping at you, and tackling you to the ground. The others look on, silently. He covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. His strength is incredible. You fight against him with everything you have, and scream, though his hand muffles you. He does not budge. He does not flinch. He does not blink. He does not blink at all. A shiver runs through your immobilized body as you look into his eyes, and see a depth, an emptiness that cannot be human. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
+	elif dobj in [vendor, picker, nurse25, daughter]:
 		app.printToGUI("You hold out the opal. " + dobj.capNameArticle(True) + " stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
+	elif dobj in [children21, woman21, man21]:
+			return True
+	elif dobj == patients25:
+			app.printToGUI("You hold out the opal for the patients to see. The nurse catches sight of it, and takes a few steps toward you. She stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
 	else:
 		app.printToGUI("You hold out the opal. " + dobj.capNameArticle(True) + " stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. He covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of his body. His strength is incredible. You fight against him with everything you have, and scream, though his hand muffles you. He does not budge. He does not flinch. He does not blink. He does not blink at all. A shiver runs through your immobilized body as you look into his eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
 	app.newBox(special_box_style)
@@ -1353,6 +1362,13 @@ opalbox.addThing(opal)
 
 opalbox_key = Key()
 opalbox_key.setAdjectives(["silver"])
+opalbox_key.taken = False
+def opalboxKeyTake(me, app):
+	if not opalbox_key.taken:
+		arai.addSpecialTopic(arai_key_special)
+		opalbox_key.taken = True
+	return True
+opalbox_key.getVerbDobj = opalboxKeyTake
 opalbox_lock = Lock(True, opalbox_key)
 opalbox.setLock(opalbox_lock)
 arai.addTopic("asktellgiveshow", arai_key, opalbox_key)
@@ -1376,9 +1392,9 @@ wand.xdescribeThing("A delicately carved dragon spirals round the wooden baton. 
 #dullbook1 = Book("book", "You read a few lines. It appears to be an exceptionally dull novel. ")
 #shelf1.addThing(dullbook1)
 shelf1.addThing(opalbox_key)
-def atticDiscover(me, app):
-	arai.addSpecialTopic(arai_key_special)
-shack1.onDiscover = atticDiscover
+#def atticDiscover(me, app):
+	#arai.addSpecialTopic(arai_key_special)
+#shack1.onDiscover = atticDiscover
 
 # SHORE 2
 shore2 = OutdoorRoom("Shore, Outside the Shack", "The sandy shore extends around the island to the east. A path to the southwest leads into the forest. ")
@@ -2524,6 +2540,7 @@ woman21.verbose_name = "woman with a baby"
 woman21.describeThing("")
 woman21.xdescribeThing("The woman with a baby has already left the square. ")
 woman21.default_topic = "The woman with a baby has already left. "
+woman21.cannot_interact_msg = "The woman with a baby has already left. "
 square21.addThing(woman21)
 man21 = Actor("man")
 man21.ignore_if_ambiguous = True
@@ -2535,6 +2552,7 @@ man21.verbose_name = "man with a barrow"
 man21.describeThing("")
 man21.xdescribeThing("The man with the barrow isn't here anymore.")
 man21.default_topic = "The man with the barrow isn't here anymore. "
+man21.cannot_interact_msg = "The man with the barrow isn't here anymore. "
 square21.addThing(man21)
 
 # HALL 22 (Hall of the Blessed)

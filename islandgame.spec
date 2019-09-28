@@ -15,8 +15,6 @@ a = Analysis(['islandgame.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
-a.datas += [('./island-icon.png', 'island-icon.png', 'DATA'),
-         ('./island/island_bg2.png', 'island_bg2.png', 'DATA')]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
