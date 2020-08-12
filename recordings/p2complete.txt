@@ -1,6 +1,5 @@
-ask
 hi
-ask
+ask what
 agree
 n
 nw
