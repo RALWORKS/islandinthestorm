@@ -132,7 +132,7 @@ def prayerAnswered(game):
 	kaur_cup.location.removeThing(kaur_cup)
 	disk.location.removeThing(disk)
 	fan.location.removeThing(fan)
-	for key, item in Thing.instances.items:
+	for key, item in Thing.instances.items():
 		storm_desc = getattr(item, "storm_desc", None)
 		if isinstance(item, Room):
 			try:
