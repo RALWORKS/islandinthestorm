@@ -13,13 +13,14 @@ from intficpy.score import Achievement, Ending, HintNode, Hint, hints, score
 from intficpy.travel import TravelConnector, DoorConnector, LadderConnector, StaircaseConnector
 from intficpy.actor import Actor, Player, Topic, SpecialTopic
 from intficpy.verb import Verb
-import intficpy.gui as gui
+
+import gui
 
 # Translate asset paths to useable format for PyInstaller
 def resource_path(relative_path):
-	if hasattr(sys, '_MEIPASS'):
-		return os.path.join(sys._MEIPASS, relative_path)
-	return os.path.join(os.path.abspath('.'), relative_path)
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath('.'), relative_path)
 
 app = QApplication(sys.argv)
 ex = gui.App()
@@ -31,10 +32,10 @@ storm_turns_left = 30
 storm_turns_full = 30
 
 def skyState():
-	if	storm_turns_left==storm_turns_full:
-		return "The sky is clear today. "
-	else:
-		return "The sky is dark, and stormy. "
+    if    storm_turns_left==storm_turns_full:
+        return "The sky is clear today. "
+    else:
+        return "The sky is dark, and stormy. "
 
 # rooms
 # SHACK 0
@@ -48,16 +49,32 @@ game.aboutGame.author = "JSMaika"
 game.aboutGame.game_instructions = "<i>Island in the Storm</i> is a fantasy puzzle game with mystery elements. The objective of the game is to escape the island. In order to do this, you will need to explore, solve puzzles and interact with islanders. A few hints:<br><br>While the game accepts conversation commands in the classic interactive fiction ask/tell/give/show format, all conversation topics can be reached through TALK TO. To talk about the suggested topics (listed in parentheses under the character's response), type out all or part of the suggestion. For instance, you could accept the suggestion, \"You could ask what the woman does for a living,\" by typing ASK WHAT THE WOMAN DOES FOR A LIVING. Unless there were other suggestions that used the word \"living\", you could also just type LIVING. Suggestions are only available immediately after they are given. <br><br>When travelling through dark areas, bring your light crystal. It recharges in full light. At full charge, it will last 50 turns. Be sure not to let it die while you're in the dark.<br><br>This game is not hint enabled. In the event that you get stuck, you can consult the walkthrough, which should have been included with your distribution package. Look for island-walkthrough.txt<br><br>Good luck!"
 game.aboutGame.betaTesterCredit = "Thank you to beta testers <br>Michael Csokas, <br>Rosa,<br> and Shaun"
 
+game.turn_event_style = (
+    "QFrame {background-color: #232323; border: 1px solid #ffffff; "
+    "border-radius:0px; margin-bottom: 15px} QLabel {color: #ffffff; "
+    "border: none; font-size: 18px;}"
+)
+game.command_event_style = (
+    "QFrame {background-color: #3a3a01; border: 2px solid #edf424; "
+    "border-radius:0px; margin-bottom: 15px} QLabel {color: #edf424; "
+    "border: none; font-size: 18px;}"
+)
+game.special_event_style = (
+    "QFrame {background-color: #210111; border: 2px solid #f4245c; "
+    "border-radius:0px; margin-bottom: 15px} QLabel {color: #f4245c;"
+    "border: none; font-size: 18px;}"
+)
+
 def killMyself(game):
-	game.addText("Oh, come now. Don't give up just yet. ")
+    game.addText("Oh, come now. Don't give up just yet. ")
 me.killVerbDobj = killMyself
 
 bed0 = Surface("bed")
 bed0.describeThing("There is a bed here. ")
 bed0.xdescribeThing("There is a bed here. {bedBoxDesc(game)}")
 def bedBoxDesc(game):
-	if underbed0.containsItem(opalbox):
-		return "It looks like there might be something underneath. "
+    if underbed0.containsItem(opalbox):
+        return "It looks like there might be something underneath. "
 bed0.canLie = True
 shack0.addThing(bed0)
 #shack0.addThing(me)
@@ -76,38 +93,37 @@ goddess_abs.level = 0
 goddess_abs.cannot_interact_msg = "The Goddess of the Storm isn't a physical being you can interact with. "
 
 def buyGoddess(game, iobj):
-	game.addText("That is impossible. ")
+    game.addText("That is impossible. ")
 goddess_abs.buyFromVerbDobj = buyGoddess
 
 def breakGoddess(game):
-	game.addText("The Goddess of the Storm is unbreakable. ")
+    game.addText("The Goddess of the Storm is unbreakable. ")
 goddess_abs.breakVerbDobj = breakGoddess
 
 def killGoddess(game):
-	game.addText("Hah! It's not going to be <i>that</i> easy. ")
+    game.addText("Hah! It's not going to be <i>that</i> easy. ")
 goddess_abs.killVerbDobj = killGoddess
 
 def giveGoddess(game, iobj):
-	if iobj is me:
-		game.addText("You kneel before the Goddess of the Storm, and offer your soul to Her. You feel Her claws closing around you.<br><br><i>YES, CHILD. COME TO ME. REST.</i><br><br>You feel a calm settling over you - peace, like nothing you've ever felt. It is beautiful. The Goddess of the Storm is beautiful, with her silver scales, and many eyes. You are Hers now, and you are glad. ")
-		global special_box_style
-		
-		kaur_ending.endGame(game)
-	else:
-		game.addText("Nothing happens. ")
+    if iobj is me:
+        game.addText("You kneel before the Goddess of the Storm, and offer your soul to Her. You feel Her claws closing around you.<br><br><i>YES, CHILD. COME TO ME. REST.</i><br><br>You feel a calm settling over you - peace, like nothing you've ever felt. It is beautiful. The Goddess of the Storm is beautiful, with her silver scales, and many eyes. You are Hers now, and you are glad. ")
+        
+        kaur_ending.endGame(game)
+    else:
+        game.addText("Nothing happens. ")
 goddess_abs.giveVerbDobj = giveGoddess
 
 def getGoddessDesc():
-	if goddess_abs.level == 1:
-		return "<i>Examine</i> the Goddess of the Storm? What would that even mean?"
-	elif goddess_abs.level == 2:
-		return "You don't see the Goddess, but you can feel <i>something</i>. You've been feeling a strange presence for a while now. "
-	elif goddess_abs.level == 2 and me.getOutermostRoom.room_group == cave_group:
-		return "You can still feel the Goddess of the Storm, but her presence is much weaker here in the caves. "
-	elif goddess_abs.level == 3:
-		return "The Goddess of the Storm rages through the sky above you. You need to move quickly."
-	else:
-		return "You can't see anything like that around here. "
+    if goddess_abs.level == 1:
+        return "<i>Examine</i> the Goddess of the Storm? What would that even mean?"
+    elif goddess_abs.level == 2:
+        return "You don't see the Goddess, but you can feel <i>something</i>. You've been feeling a strange presence for a while now. "
+    elif goddess_abs.level == 2 and me.getOutermostRoom.room_group == cave_group:
+        return "You can still feel the Goddess of the Storm, but her presence is much weaker here in the caves. "
+    elif goddess_abs.level == 3:
+        return "The Goddess of the Storm rages through the sky above you. You need to move quickly."
+    else:
+        return "You can't see anything like that around here. "
 goddess_abs.describeThing("")
 goddess_abs.ignore_if_ambiguous = True
 goddess_abs.xdescribeThing(f"{getGoddessDesc()}")
@@ -121,119 +137,117 @@ previous_kaur_offering = False
 previous_bad_offering = False
 
 def prayerAnswered(game):
-	game.daemons.add(goddessStormDaemon)
-	square21.removeThing(villagers21)
-	square21.removeThing(woman21)
-	square21.removeThing(children21)
-	square21.removeThing(man21)
-	goddess_abs.level = 3
-	lightcrystal.location.removeThing(lightcrystal)
-	game.daemons.remove(crystalCharge)
-	kaur_cup.location.removeThing(kaur_cup)
-	disk.location.removeThing(disk)
-	fan.location.removeThing(fan)
-	for key, item in Thing.instances.items():
-		storm_desc = getattr(item, "storm_desc", None)
-		if isinstance(item, Room):
-			try:
-				item.desc = item.storm_desc
-			except AttributeError:
-				pass
-			continue
-		if isinstance(item, Actor):
-			try:
-				item.setHermitTopic(item.storm_hermit_state)
-			except AttributeError:
-				pass
-		if isinstance(item, Thing):
-			try:
-				item.describeThing(item.storm_desc)
-			except AttributeError:
-				pass
-			try:
-				item.xdescribeThing(item.storm_xdesc)
-			except AttributeError:
-				pass
+    game.daemons.add(goddessStormDaemon)
+    square21.removeThing(villagers21)
+    square21.removeThing(woman21)
+    square21.removeThing(children21)
+    square21.removeThing(man21)
+    goddess_abs.level = 3
+    lightcrystal.location.removeThing(lightcrystal)
+    game.daemons.remove(crystalCharge)
+    kaur_cup.location.removeThing(kaur_cup)
+    disk.location.removeThing(disk)
+    fan.location.removeThing(fan)
+    for key, item in Thing.instances.items():
+        storm_desc = getattr(item, "storm_desc", None)
+        if isinstance(item, Room):
+            try:
+                item.desc = item.storm_desc
+            except AttributeError:
+                pass
+            continue
+        if isinstance(item, Actor):
+            try:
+                item.setHermitTopic(item.storm_hermit_state)
+            except AttributeError:
+                pass
+        if isinstance(item, Thing):
+            try:
+                item.describeThing(item.storm_desc)
+            except AttributeError:
+                pass
+            try:
+                item.xdescribeThing(item.storm_xdesc)
+            except AttributeError:
+                pass
 
-	game.addText("<i>I SEE. YOU WISH ME TO SET MY CHILDREN FREE? THEN FREE THEY SHALL BE. FREE FROM MY CARE. FREE FROM MY PROTECTION. AND WHAT I DO NOT PROTECT, I DESTROY. </i>")
-	game.addText("The sky darkens. Rain starts to fall. Within moments, a storm has begun. ")
-	game.addText("<i>THIS IS THE END, HUMAN. </i>")
-	global special_box_style
-	
-	offeringAchievement.award(game)
+    game.addText("<i>I SEE. YOU WISH ME TO SET MY CHILDREN FREE? THEN FREE THEY SHALL BE. FREE FROM MY CARE. FREE FROM MY PROTECTION. AND WHAT I DO NOT PROTECT, I DESTROY. </i>")
+    game.addText("The sky darkens. Rain starts to fall. Within moments, a storm has begun. ")
+    game.addText("<i>THIS IS THE END, HUMAN. </i>")
+    
+    offeringAchievement.award(game)
 
 prayer_topic1 = SpecialTopic("whisper the prayer from the cavern wall", "You whisper the prayer from the cavern wall.  <br><br><i>You who brings the rain, I pray thee, listen. <br>You who protects this land, <br>You who kills the interloper; sinks ships; holds our hearts - <br>Hear my cry, O Goddess of the Storm, <br>Come before me now, <br>See my flesh and soul, <br>Take the gifts I offer. Hear my request. <br>So be it.</i>")
 #goddess_abs.addSpecialTopic(prayer_topic1)
 def prayerTopic1(app, suggest=True):
-	global previous_no_offering
-	global previous_kaur_offering
-	global previous_bad_offering
-	global special_box_style
-	game.addText(prayer_topic1.text)
-	loc = me.getOutermostLocation()
-	if loc == temple29:
-		if altar_n29.contains == {} and altar_s29.contains == {} and altar_e29.contains == {} and altar_w29.contains == {}:
-			if not previous_no_offering:
-				game.addText("The Goddess' presence intensifies. A voice whispers in your mind, faint but sharp; angry. <br><br><i>You stand in my temple and demand my attention while you offer me nothing? Do not try my patience further, Outsider. </i>")
-				previous_no_offering = True
-			else:
-				game.addText("The Goddess' presence intensifies. A voice roars in your mind, like the crashing of waves. <br><br><i>YOU ARE AN OUTSIDER. YOU ARE AN ENEMY. I HAVE OFFERED YOU MY GIFT, AND YOU HAVE TURNED ME DOWN. AGAIN, YOU CRY OUT TO ME LIKE A MEWLING KITTEN. AGAIN, YOU OFFER ME NOTHING. HERE IS MY ANSWER, FOOL: DIE WHERE YOU STAND. </i>")
-				
-				insult_goddess_ending.endGame(game)
-		elif altar_n29.containsItem(kaur_liquid) or altar_s29.containsItem(kaur_liquid) or altar_e29.containsItem(kaur_liquid) or altar_w29.containsItem(kaur_liquid):
-			if not previous_kaur_offering:
-				
-				game.addText("The Goddess' presence intensifies. A voice hisses in your mind, an angry warning. <br><br><i>Do not offer me Kaur when you will not drink it, outsider.</i>")
-				previous_kaur_offering = True
-			else:
-				
-				game.addText("The Goddess' presence intensifies. A voice roars in your mind, like the crashing of waves. <br><br><i>I HAVE GIVEN YOU THE CHANCE TO ASSIMILATE, OUTSIDER. I HAVE BEEN PATIENT. I HAVE SENT MY CHILDREN TO YOU IN FRIENDSHIP. NOW, STILL FOREIGN, STILL OTHER, STILL ENEMY, YOU CLAIM THE RIGHT OF MY DEVOTED? I HAVE WARNED YOU ONCE, YET YOU STILL DEFY ME. LET THIS BE YOUR LAST MISTAKE. </i>")
-				
-				insult_goddess_ending.endGame(game)
-		else:
-			correct = 0
-			incorrect = 0
-			# WEST: OCEAN
-			if seawater_taken.ix in altar_w29.sub_contains and len(altar_w29.contains)==1:
-				correct += 1
-			elif altar_w29.contains != {}:
-				incorrect += 1
-			# NORTH: DISK OF EARTH
-			if altar_n29.containsItem(disk) and len(altar_n29.contains)==1:
-				correct += 1
-			elif altar_n29.contains != {}:
-				incorrect += 1
-			# SOUTH: POWER OF THE SUN
-			if altar_s29.containsItem(lightcrystal) and len(altar_s29.contains)==1:
-				correct += 1
-			elif altar_s29.contains != {}:
-				incorrect += 1
-			# EAST: WING
-			if altar_e29.containsItem(fan) and len(altar_e29.contains)==1:
-				correct += 1
-			elif altar_e29.contains != {}:
-				incorrect += 1
-			if incorrect == 0 and correct ==1:
-				
-				game.addText("The Goddess' presence intensifies. A voice whispers in your mind, faint, and mocking. <br><br><i>One offering? It will take more than that, Outsider. </i>")
-			elif incorrect == 0 and correct ==2:
-				
-				game.addText("The Goddess' presence intensifies. A voice whispers in your mind, quiet, but rough. <br><br><i>You have caught my attention, Mortal. Perhaps you are less foolish than you seem. </i>")
-			elif incorrect == 0 and correct ==3:
-				
-				game.addText("The Goddess' presence intensifies. You feel her watching you intently. A voice whispers in your mind. <br><br><i>I am waiting for the fourth, Outsider. </i>")
-			elif incorrect == 0 and correct ==4:
-				
-				game.addText("The Goddess' presence intensifies. A voice roars in your mind, like the crashing of waves. <br><br><i>YOU HAVE PLACED BEFORE ME THE DISK, THE WING, THE SUN, THE OCEAN. I AM HERE. I AM LISTENING. WHY DID YOU CALL FOR ME? </i>")
-				prayerAnswered(game)
-			elif not previous_bad_offering:
-				
-				game.addText("The Goddess' presence intensifies. A voice whispers in your mind, faint, and mocking. <br><br><i>This is what you offer? Pathetic. Give me a real offering, and perhaps I shall answer your prayer. </i>")
-				previous_bad_offering = True
-			else:
-				game.addText("Nothing happens. Maybe you should offer something else. ")
-	else:
-		game.addText("Nothing happens. Maybe you should try praying at the temple. ")
+    global previous_no_offering
+    global previous_kaur_offering
+    global previous_bad_offering
+    game.addEvent("prayer", 6, text=prayer_topic1.text, style=game.special_event_style)
+    loc = me.getOutermostLocation()
+    if loc == temple29:
+        if altar_n29.contains == {} and altar_s29.contains == {} and altar_e29.contains == {} and altar_w29.contains == {}:
+            if not previous_no_offering:
+                game.addText("The Goddess' presence intensifies. A voice whispers in your mind, faint but sharp; angry. <br><br><i>You stand in my temple and demand my attention while you offer me nothing? Do not try my patience further, Outsider. </i>")
+                previous_no_offering = True
+            else:
+                game.addText("The Goddess' presence intensifies. A voice roars in your mind, like the crashing of waves. <br><br><i>YOU ARE AN OUTSIDER. YOU ARE AN ENEMY. I HAVE OFFERED YOU MY GIFT, AND YOU HAVE TURNED ME DOWN. AGAIN, YOU CRY OUT TO ME LIKE A MEWLING KITTEN. AGAIN, YOU OFFER ME NOTHING. HERE IS MY ANSWER, FOOL: DIE WHERE YOU STAND. </i>")
+                
+                insult_goddess_ending.endGame(game)
+        elif altar_n29.containsItem(kaur_liquid) or altar_s29.containsItem(kaur_liquid) or altar_e29.containsItem(kaur_liquid) or altar_w29.containsItem(kaur_liquid):
+            if not previous_kaur_offering:
+                
+                game.addText("The Goddess' presence intensifies. A voice hisses in your mind, an angry warning. <br><br><i>Do not offer me Kaur when you will not drink it, outsider.</i>")
+                previous_kaur_offering = True
+            else:
+                
+                game.addText("The Goddess' presence intensifies. A voice roars in your mind, like the crashing of waves. <br><br><i>I HAVE GIVEN YOU THE CHANCE TO ASSIMILATE, OUTSIDER. I HAVE BEEN PATIENT. I HAVE SENT MY CHILDREN TO YOU IN FRIENDSHIP. NOW, STILL FOREIGN, STILL OTHER, STILL ENEMY, YOU CLAIM THE RIGHT OF MY DEVOTED? I HAVE WARNED YOU ONCE, YET YOU STILL DEFY ME. LET THIS BE YOUR LAST MISTAKE. </i>")
+                
+                insult_goddess_ending.endGame(game)
+        else:
+            correct = 0
+            incorrect = 0
+            # WEST: OCEAN
+            if seawater_taken.ix in altar_w29.sub_contains and len(altar_w29.contains)==1:
+                correct += 1
+            elif altar_w29.contains != {}:
+                incorrect += 1
+            # NORTH: DISK OF EARTH
+            if altar_n29.containsItem(disk) and len(altar_n29.contains)==1:
+                correct += 1
+            elif altar_n29.contains != {}:
+                incorrect += 1
+            # SOUTH: POWER OF THE SUN
+            if altar_s29.containsItem(lightcrystal) and len(altar_s29.contains)==1:
+                correct += 1
+            elif altar_s29.contains != {}:
+                incorrect += 1
+            # EAST: WING
+            if altar_e29.containsItem(fan) and len(altar_e29.contains)==1:
+                correct += 1
+            elif altar_e29.contains != {}:
+                incorrect += 1
+            if incorrect == 0 and correct ==1:
+                
+                game.addText("The Goddess' presence intensifies. A voice whispers in your mind, faint, and mocking. <br><br><i>One offering? It will take more than that, Outsider. </i>")
+            elif incorrect == 0 and correct ==2:
+                
+                game.addText("The Goddess' presence intensifies. A voice whispers in your mind, quiet, but rough. <br><br><i>You have caught my attention, Mortal. Perhaps you are less foolish than you seem. </i>")
+            elif incorrect == 0 and correct ==3:
+                
+                game.addText("The Goddess' presence intensifies. You feel her watching you intently. A voice whispers in your mind. <br><br><i>I am waiting for the fourth, Outsider. </i>")
+            elif incorrect == 0 and correct ==4:
+                
+                game.addText("The Goddess' presence intensifies. A voice roars in your mind, like the crashing of waves. <br><br><i>YOU HAVE PLACED BEFORE ME THE DISK, THE WING, THE SUN, THE OCEAN. I AM HERE. I AM LISTENING. WHY DID YOU CALL FOR ME? </i>")
+                prayerAnswered(game)
+            elif not previous_bad_offering:
+                
+                game.addText("The Goddess' presence intensifies. A voice whispers in your mind, faint, and mocking. <br><br><i>This is what you offer? Pathetic. Give me a real offering, and perhaps I shall answer your prayer. </i>")
+                previous_bad_offering = True
+            else:
+                game.addText("Nothing happens. Maybe you should offer something else. ")
+    else:
+        game.addText("Nothing happens. Maybe you should try praying at the temple. ")
 prayer_topic1.func = prayerTopic1
 # storm abstract, which is replaced as a concept by the goddess once the player learns of her
 storm_abs = Abstract("storm")
@@ -259,21 +273,29 @@ lightcrystal.player_can_extinguish = False
 lightcrystal.cannot_light_msg = "Once charged by sunlight, the crystal will light itself in darkness. "
 lightcrystal.cannot_extinguish_msg = "The crystal cannot be put out, except by placing it in the light. "
 def _consumeLightCrystalDaemon(game):
-	from intficpy.verb import helpVerb, helpVerbVerb, aboutVerb
-	if not (game.parser.previous_command.verb==helpVerb or game.parser.previous_command.verb==helpVerbVerb or game.parser.previous_command.verb==aboutVerb or game.parser.previous_command.ambiguous or game.parser.previous_command.err):
-		lightcrystal.turns_left  -= 1
-		if lightcrystal.turns_left == 0:
-			if me.getOutermostLocation() == lightcrystal.getOutermostLocation():
-				game.addText(lightcrystal.extinguishing_expired_msg)
-			lightcrystal.is_lit = False
-			if lightcrystal.consumeLightSourceDaemon in game.daemons.active:
-				game.daemons.remove(lightcrystal.consumeLightSourceDaemon)
-		elif me.getOutermostLocation() == lightcrystal.getOutermostLocation():
-			global special_box_style
-			if lightcrystal.turns_left < 5:
-				game.addText(lightcrystal.expiry_warning + str(lightcrystal.turns_left) + " turns left. ")
-			elif (lightcrystal.turns_left % 5)==0:
-				game.addText(lightcrystal.expiry_warning + str(lightcrystal.turns_left) + " turns left. ")
+    from intficpy.verb import helpVerb, helpVerbVerb, aboutVerb
+    if not (game.parser.previous_command.verb==helpVerb or game.parser.previous_command.verb==helpVerbVerb or game.parser.previous_command.verb==aboutVerb or game.parser.previous_command.ambiguous or game.parser.previous_command.err):
+        lightcrystal.turns_left  -= 1
+        if lightcrystal.turns_left == 0:
+            if me.getOutermostLocation() == lightcrystal.getOutermostLocation():
+                game.addText(lightcrystal.extinguishing_expired_msg)
+            lightcrystal.is_lit = False
+            if lightcrystal.consumeLightSourceDaemon in game.daemons.active:
+                game.daemons.remove(lightcrystal.consumeLightSourceDaemon)
+        elif me.getOutermostLocation() == lightcrystal.getOutermostLocation():
+            if lightcrystal.turns_left < 5:
+                game.addEvent(
+                    "crystal",
+                     6,
+                     text=(
+                        lightcrystal.expiry_warning
+                        + str(lightcrystal.turns_left)
+                        + " turns left. "
+                     ),
+                     style=game.special_event_style
+                )
+            elif (lightcrystal.turns_left % 5)==0:
+                game.addText(lightcrystal.expiry_warning + str(lightcrystal.turns_left) + " turns left. ")
 consumeLightCrystalDaemon = Daemon(_consumeLightCrystalDaemon)
 lightcrystal.consumeLightSourceDaemon = consumeLightCrystalDaemon
 boat_sail = Thing("sail")
@@ -292,17 +314,17 @@ patchkit.setAdjectives(["patch"])
 patchkit.describeThing("There is a patch kit here. ")
 patchkit.xdescribeThing("The patch kit contains everything you will need to repair your hull. ")
 def usePatchkit(game):
-	if me.getOutermostLocation()==shore6:
-		repairWithVerb.verbFunc(game, myboat, patchkit)
-	else:
-		game.addText("There's nothing here that needs to be patched. ")
-	return False
+    if me.getOutermostLocation()==shore6:
+        repairWithVerb.verbFunc(game, myboat, patchkit)
+    else:
+        game.addText("There's nothing here that needs to be patched. ")
+    return False
 patchkit.useVerbDobj = usePatchkit
 
 shovel = Thing("shovel")
 def useShovel(game):
-	digWithVerb.verbFunc(game, shovel)
-	return False
+    digWithVerb.verbFunc(game, shovel)
+    return False
 shovel.useVerbDobj = useShovel
 
 shovel.xdescribeThing("The shovel is metal, with a wooden handle. ")
@@ -333,19 +355,17 @@ kaur_liquid._verbose_name = "Kaur"
 kaur_liquid.size = 25
 kaur_liquid.xdescribeThing("The Kaur is a thick, dark green liquid. ")
 def kaurDrinkLiquid(game):
-	global special_box_style
-	game.addText("A warm, calm feeling spreads through you. ")
-	
-	kaur_ending.endGame(game)
-	return True
+    game.addText("A warm, calm feeling spreads through you. ")
+    kaur_ending.endGame(game)
+    return True
 kaur_liquid.drinkLiquid = kaurDrinkLiquid
 
 def pickaxeUse(game):
-	game.parser.command.verb = breakWithVerb
-	game.parser.command.iobj = GrammarObj(target=pickaxe)
-	game.parser.command.ambiguous = True
-	game.addText("What would you like to break with the pickaxe? ")
-	return False
+    game.parser.command.verb = breakWithVerb
+    game.parser.command.iobj = GrammarObj(target=pickaxe)
+    game.parser.command.ambiguous = True
+    game.addText("What would you like to break with the pickaxe? ")
+    return False
 pickaxe.useVerbDobj = pickaxeUse
 goldingot = Thing("ingot")
 goldingot.addSynonym("gold")
@@ -361,24 +381,24 @@ woodboard.size = 49
 woodboard.describeThing("A wooden plank lies on the ground. ")
 woodboard.xdescribeThing("The wooden plank is long and sturdy. ")
 def woodboardUse(game):
-	import intficpy.travel as travel
-	if me.getOutermostLocation() == cave4_2:
-		if not cave4_2.south:
-			putAcrossVerb.verbFunc(game, woodboard, chasm4_2)
-		else:
-			travel.travelS(game)
-	elif me.getOutermostLocation() == cave4:
-		travel.travelN(game)
-	else:
-		game.addText("There's no obvious way of using " + woodboard.lowNameArticle(True) + " here. ")
-	return False
+    import intficpy.travel as travel
+    if me.getOutermostLocation() == cave4_2:
+        if not cave4_2.south:
+            putAcrossVerb.verbFunc(game, woodboard, chasm4_2)
+        else:
+            travel.travelS(game)
+    elif me.getOutermostLocation() == cave4:
+        travel.travelN(game)
+    else:
+        game.addText("There's no obvious way of using " + woodboard.lowNameArticle(True) + " here. ")
+    return False
 woodboard.useVerbDobj = woodboardUse
 def woodboardSetOn(game, iobj):
-	if iobj==chasm4_2:
-		putAcrossVerb.verbFunc(game, woodboard, chasm4_2)
-		return False
-	else:
-		return True
+    if iobj==chasm4_2:
+        putAcrossVerb.verbFunc(game, woodboard, chasm4_2)
+        return False
+    else:
+        return True
 woodboard.setOnVerbDobj = woodboardSetOn
 
 # ACHIEVEMENTS
@@ -429,75 +449,75 @@ arai_death_topics = False
 damage_known = False
 
 def lensFunc(game):
-	loc = me.getOutermostLocation()
-	try:
-		loc.lensReveal(game)
-	except:
-		game.addText("Looking through the lens reveals nothing you couldn't see already. ")
-	return True
+    loc = me.getOutermostLocation()
+    try:
+        loc.lensReveal(game)
+    except:
+        game.addText("Looking through the lens reveals nothing you couldn't see already. ")
+    return True
 lens.lookThrough = lensFunc
 
 def compassMsg():
-	if not compass.location:
-		return "Your compass is missing. "
-	else:
-		return "You still don't have your compass, but the one you found at the buried wreck should replace it well enough. "
+    if not compass.location:
+        return "Your compass is missing. "
+    else:
+        return "You still don't have your compass, but the one you found at the buried wreck should replace it well enough. "
 
 def damageKnown(game):
-	global damage_known
-	damage_known = True
-	mycompass.makeKnown(me)
-	# picker
-	picker.addSpecialTopic(picker_compass_special)
-	picker.addSpecialTopic(picker_sail_special)
-	picker.addSpecialTopic(picker_hull_special)
-	picker.addSpecialTopic(picker_crystal_special)
-	# vendor
-	vendor.addSpecialTopic(vendor_compass_special)
-	vendor.addSpecialTopic(vendor_sail_special)
-	vendor.addSpecialTopic(vendor_hull_special)
-	vendor.addSpecialTopic(vendor_crystal_special)
-	##hints.setNode(fixBoatHintNode)
-	#hints.closeNode(findBoatHintNode)
-	
+    global damage_known
+    damage_known = True
+    mycompass.makeKnown(me)
+    # picker
+    picker.addSpecialTopic(picker_compass_special)
+    picker.addSpecialTopic(picker_sail_special)
+    picker.addSpecialTopic(picker_hull_special)
+    picker.addSpecialTopic(picker_crystal_special)
+    # vendor
+    vendor.addSpecialTopic(vendor_compass_special)
+    vendor.addSpecialTopic(vendor_sail_special)
+    vendor.addSpecialTopic(vendor_hull_special)
+    vendor.addSpecialTopic(vendor_crystal_special)
+    ##hints.setNode(fixBoatHintNode)
+    #hints.closeNode(findBoatHintNode)
+    
 def removeSailTopics():
-	picker.removeSpecialTopic(picker_sail_special)
-	vendor.removeSpecialTopic(vendor_sail_special)
+    picker.removeSpecialTopic(picker_sail_special)
+    vendor.removeSpecialTopic(vendor_sail_special)
 
 def removeHullTopics():
-	picker.removeSpecialTopic(picker_hull_special)
-	vendor.removeSpecialTopic(vendor_hull_special)
+    picker.removeSpecialTopic(picker_hull_special)
+    vendor.removeSpecialTopic(vendor_hull_special)
 
 def removeCompassTopics():
-	picker.removeSpecialTopic(picker_compass_special)
-	#print(picker.special_topics)
-	vendor.removeSpecialTopic(vendor_compass_special)
+    picker.removeSpecialTopic(picker_compass_special)
+    #print(picker.special_topics)
+    vendor.removeSpecialTopic(vendor_compass_special)
 
 def araiWarning1(game):
-	if picker.tavern_bound and picker.location != pub20:
-		picker.location.removeThing(picker)
-		pub20.addThing(picker)
-		picker.describeThing(f"{picker.capNameArticle(True)} sits alone at a table. She smiles at you. ")
-		picker.hermit_topic = None
-		picker.removeAllSpecialTopics()
-		picker.removeAllTopics()
-		shovel.describeThing("There is a shovel here. ")
-		picker.setHiTopics(picker_hi3, picker_hi4)
-		picker.defaultTopic = picker_hi4.func
-		shovel.invItem = True
-		game.addText("Arai runs up to you as you enter the market square. \"I heard Ket invited you to the tavern,\" she says. \"She doesn't mean you any harm, but if she offers you a green drink called Kaur, don't drink it. I can't say that you'd regret it, but if you ever want to get off this island, it's the wrong thing to do. Just don't drink it, OK?\"")
-		game.addText("Arai takes a few steps back, allowing you to pass. ")
-		
+    if picker.tavern_bound and picker.location != pub20:
+        picker.location.removeThing(picker)
+        pub20.addThing(picker)
+        picker.describeThing(f"{picker.capNameArticle(True)} sits alone at a table. She smiles at you. ")
+        picker.hermit_topic = None
+        picker.removeAllSpecialTopics()
+        picker.removeAllTopics()
+        shovel.describeThing("There is a shovel here. ")
+        picker.setHiTopics(picker_hi3, picker_hi4)
+        picker.defaultTopic = picker_hi4.func
+        shovel.invItem = True
+        game.addText("Arai runs up to you as you enter the market square. \"I heard Ket invited you to the tavern,\" she says. \"She doesn't mean you any harm, but if she offers you a green drink called Kaur, don't drink it. I can't say that you'd regret it, but if you ever want to get off this island, it's the wrong thing to do. Just don't drink it, OK?\"")
+        game.addText("Arai takes a few steps back, allowing you to pass. ")
+        
 def lightDrop(game):
-	loc = me.getOutermostLocation()
-	if loc.dark:
-		if lightcrystal.is_lit:
-			game.addText("If you drop the light crystal here, you'll never be able to find it once it dies. ")
-		else:
-			game.addText("You'll never find the light crystal if you drop it now. ")
-		return False
-	else:
-		return True
+    loc = me.getOutermostLocation()
+    if loc.dark:
+        if lightcrystal.is_lit:
+            game.addText("If you drop the light crystal here, you'll never be able to find it once it dies. ")
+        else:
+            game.addText("You'll never find the light crystal if you drop it now. ")
+        return False
+    else:
+        return True
 
 lightcrystal.dropVerbDobj = lightDrop
 # REPAIR WITH
@@ -512,48 +532,47 @@ repairWithVerb.iscope = "inv"
 repairWithVerb.preposition = ["with", "using"]
 
 def repairWithVerbFunc(game, dobj, iobj):
-	"""Repair something using a tool
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	global special_box_style
-	if dobj==boat_power:
-		game.addText("You won't be able to fix the power crystal using " + iobj.getArticle(True) + iobj.verbose_name + ". ")
-	elif dobj==boat_sail:
-		if iobj==needlethread:
-			boat_sail.broken = False
-			boat_sail.describeThing("The sail has been repaired. ")
-			boat_sail.xdescribeThing("The sail has been repaired. ")
-			game.addText("You stitch up the torn sail, using all of the thread. ")
-			removeSailTopics()
-			me.removeThing(iobj)
-			
-			sailAchievement.award(game)
-			#hints.closeNode(sewSailHintNode)
-			if not myboat.broken and compass.location and not boat_sail.broken:
-				part1EndCut(game)
-			return True
-		else:
-			game.addText((iobj.getArticle(True) + iobj.verbose_name).capitalize() + " isn't the right tool for repairing the sail. ")
-			return False
-	elif dobj==myboat:
-		if iobj==patchkit:
-			myboat.broken = False
-			myboat.describeThing("Your boat lies on shore. Its hull has been patched. ")
-			myboat.xdescribeThing(f"You examine your boat carefully, taking stock of the damage. You have a lot to do before you'll be able to leave. {compassMsg()} The hull has been patched. ")
-			game.addText("You repair the hull using the patch kit. ")
-			me.removeThing(iobj)
-			
-			hullAchievement.award(game)
-			removeHullTopics()
-			#hints.closeNode(patchHullHintNode)
-			if not myboat.broken and compass.location and not boat_sail.broken:
-				part1EndCut(game)
-			return True
-		else:
-			game.addText((iobj.getArticle(True) + iobj.verbose_name).capitalize() + " isn't the right tool for repairing the damaged hull. ")
-			return False
-	else:
-		game.addText("There's no need to repair " + dobj.getArticle(True) + dobj.verbose_name + ". ")
-		return False
+    """Repair something using a tool
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    if dobj==boat_power:
+        game.addText("You won't be able to fix the power crystal using " + iobj.getArticle(True) + iobj.verbose_name + ". ")
+    elif dobj==boat_sail:
+        if iobj==needlethread:
+            boat_sail.broken = False
+            boat_sail.describeThing("The sail has been repaired. ")
+            boat_sail.xdescribeThing("The sail has been repaired. ")
+            game.addText("You stitch up the torn sail, using all of the thread. ")
+            removeSailTopics()
+            me.removeThing(iobj)
+            
+            sailAchievement.award(game)
+            #hints.closeNode(sewSailHintNode)
+            if not myboat.broken and compass.location and not boat_sail.broken:
+                part1EndCut(game)
+            return True
+        else:
+            game.addText((iobj.getArticle(True) + iobj.verbose_name).capitalize() + " isn't the right tool for repairing the sail. ")
+            return False
+    elif dobj==myboat:
+        if iobj==patchkit:
+            myboat.broken = False
+            myboat.describeThing("Your boat lies on shore. Its hull has been patched. ")
+            myboat.xdescribeThing(f"You examine your boat carefully, taking stock of the damage. You have a lot to do before you'll be able to leave. {compassMsg()} The hull has been patched. ")
+            game.addText("You repair the hull using the patch kit. ")
+            me.removeThing(iobj)
+            
+            hullAchievement.award(game)
+            removeHullTopics()
+            #hints.closeNode(patchHullHintNode)
+            if not myboat.broken and compass.location and not boat_sail.broken:
+                part1EndCut(game)
+            return True
+        else:
+            game.addText((iobj.getArticle(True) + iobj.verbose_name).capitalize() + " isn't the right tool for repairing the damaged hull. ")
+            return False
+    else:
+        game.addText("There's no need to repair " + dobj.getArticle(True) + dobj.verbose_name + ". ")
+        return False
 
 # replace the default verbFunc method
 repairWithVerb.verbFunc = repairWithVerbFunc
@@ -567,17 +586,17 @@ repairVerb.hasDobj = True
 repairVerb.dscope = "near"
 
 def repairVerbFunc(game, dobj):
-	"""Redriect to repair with
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
-	if dobj==boat_power:
-		game.addText("Repairing the crystal is beyond your skills. ")
-	elif dobj==boat_sail or dobj==myboat:
-		game.parser.command.ambiguous = True
-		game.parser.command.dobj = GrammarObject(target=dobj)
-		game.parser.command.verb = repairWithVerb
-		game.addText("What would you like to repair it with? ")
-	else:
-		game.addText("There's no need to repair " + dobj.getArticle(True) + dobj.verbose_name + ". ")
+    """Redriect to repair with
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
+    if dobj==boat_power:
+        game.addText("Repairing the crystal is beyond your skills. ")
+    elif dobj==boat_sail or dobj==myboat:
+        game.parser.command.ambiguous = True
+        game.parser.command.dobj = GrammarObject(target=dobj)
+        game.parser.command.verb = repairWithVerb
+        game.addText("What would you like to repair it with? ")
+    else:
+        game.addText("There's no need to repair " + dobj.getArticle(True) + dobj.verbose_name + ". ")
 
 # replace the default verbFunc method
 repairVerb.verbFunc = repairVerbFunc
@@ -593,15 +612,15 @@ patchWithVerb.iscope = "inv"
 patchWithVerb.preposition = ["with", "using"]
 
 def patchWithVerbFunc(game, dobj, iobj):
-	"""Patch something using a tool
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	if iobj != patchkit:
-		game.addText("You can't patch anything with " + iobj.getArticle(False) + iobj.verbose_name + ". ")
-	elif dobj != myboat:
-		game.addText("You cannot patch " + dobj.getArticle(False) + dobj.verbose_name + ". ")
-	else:
-		repairWithVerb.verbFunc(game, dobj, iobj)
-	
+    """Patch something using a tool
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    if iobj != patchkit:
+        game.addText("You can't patch anything with " + iobj.getArticle(False) + iobj.verbose_name + ". ")
+    elif dobj != myboat:
+        game.addText("You cannot patch " + dobj.getArticle(False) + dobj.verbose_name + ". ")
+    else:
+        repairWithVerb.verbFunc(game, dobj, iobj)
+    
 # replace the default verbFunc method
 patchWithVerb.verbFunc = patchWithVerbFunc
 
@@ -613,14 +632,14 @@ patchVerb.hasDobj = True
 patchVerb.dscope = "near"
 
 def patchVerbFunc(game, dobj):
-	"""Patch a Thing
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
-	if patchkit.ix not in me.contains and patchkit.ix not in me.sub_contains:
-		game.addText("You don't have a patch kit. ")
-	elif dobj != myboat:
-		game.addText("There's no reason to patch " + dobj.getArticle(True) + dobj.verbose_name + ". ")
-	else:
-		repairWithVerb.verbFunc(game, dobj, patchkit)
+    """Patch a Thing
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
+    if patchkit.ix not in me.contains and patchkit.ix not in me.sub_contains:
+        game.addText("You don't have a patch kit. ")
+    elif dobj != myboat:
+        game.addText("There's no reason to patch " + dobj.getArticle(True) + dobj.verbose_name + ". ")
+    else:
+        repairWithVerb.verbFunc(game, dobj, patchkit)
 
 # replace the default verbFunc method
 patchVerb.verbFunc = patchVerbFunc
@@ -637,15 +656,15 @@ sewWithVerb.iscope = "inv"
 sewWithVerb.preposition = ["with", "using"]
 
 def sewWithVerbFunc(game, dobj, iobj):
-	"""Sew something using a tool
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	if iobj != needlethread:
-		game.addText("You cannot sew with " + iobj.getArticle(False) + iobj.verbose_name + ". ")
-	elif dobj != boat_sail:
-		game.addText("You cannot sew " + dobj.getArticle(False) + dobj.verbose_name + ". ")
-	else:
-		repairWithVerb.verbFunc(game, dobj, iobj)
-	
+    """Sew something using a tool
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    if iobj != needlethread:
+        game.addText("You cannot sew with " + iobj.getArticle(False) + iobj.verbose_name + ". ")
+    elif dobj != boat_sail:
+        game.addText("You cannot sew " + dobj.getArticle(False) + dobj.verbose_name + ". ")
+    else:
+        repairWithVerb.verbFunc(game, dobj, iobj)
+    
 # replace the default verbFunc method
 sewWithVerb.verbFunc = sewWithVerbFunc
 
@@ -658,14 +677,14 @@ sewVerb.hasDobj = True
 sewVerb.dscope = "near"
 
 def sewVerbFunc(game, dobj):
-	"""Sew
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
-	if needlethread.ix not in me.contains and needlethread.ix not in me.sub_contains:
-		game.addText("You cannot sew without a needle and thread. ")
-	elif dobj != boat_sail:
-		game.addText("You cannot sew " + dobj.getArticle(False) + dobj.verbose_name + ". ")
-	else:
-		repairWithVerb.verbFunc(game, dobj, needlethread)
+    """Sew
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
+    if needlethread.ix not in me.contains and needlethread.ix not in me.sub_contains:
+        game.addText("You cannot sew without a needle and thread. ")
+    elif dobj != boat_sail:
+        game.addText("You cannot sew " + dobj.getArticle(False) + dobj.verbose_name + ". ")
+    else:
+        repairWithVerb.verbFunc(game, dobj, needlethread)
 
 # replace the default verbFunc method
 sewVerb.verbFunc = sewVerbFunc
@@ -680,43 +699,42 @@ digWithVerb.iscope = "inv"
 digWithVerb.preposition = ["with", "using"]
 
 def digWithVerbFunc(game, iobj):
-	"""Dig using a tool
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	loc = me.getOutermostLocation()
-	if iobj!=shovel:
-		game.addText(( iobj.getArticle(True) + iobj.verbose_name).capitalize() + " is not a good tool for digging. ")
-	elif loc == shore8:
-		if compass.location:
-			game.addText("You've already dug here enough. ")
-			return False
-		else:
-			game.addText("You begin to dig up the buried wreck. With the shovel, you are able to uncover much, and quickly. Most of what you find is simply debris - chunks of waterlogged wood, with the occasional mangled fastening - nothing you have any use for. You're on the verge of quitting, when your shovel scrapes agaist something smooth, and hard. You feel around the object with the shovel, before scooping it up in a clump of damp sand. <br><br>As you brush the sand from the object, you find that it is a compass.  The casing is rusty, but intact.  The inside appears dry and the needle turns smoothly. Even the calibration seems right. If Ket insists on keeping your compass, this will work as a replacement until you can get a new one. <br><br>You dig a little more, but find nothing else of value. Most likely, this wreck has already yielded all its treasures. ")
-			game.addText("(Received: rusty compass)")
-			shore8.floor.describeThing("The sand here is uneven from your digging. ")
-			shore8.floor.xdescribeThing("The sand here is uneven from your digging. ")
-			me.addThing(compass)
-			global special_box_style
-			
-			compassAchievement.award(game)
-			#hints.closeNode(digWreckHintNode)
-			if not myboat.broken and compass.location and not boat_sail.broken:
-				part1EndCut(game)
-			return True
-	elif loc == cave7:
-		if not me.containsItem(opal) and not cave7.containsItem(opal):
-			game.addText("You came down here to bury the opal. You should go get it before you start digging. ")
-			return False
-		elif not me.containsItem(opal):
-			from intficpy.verb import getVerb
-			game.addText("(First trying to take the opal)")
-			success = getVerb.verbFunc(game, opal)
-			if not success:
-				return Falsef
-		buryWithVerb.verbFunc(game, opal, shovel)
-		return True
-	else:
-		game.addText("There's no reason to dig here. ")
-		return False
+    """Dig using a tool
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    loc = me.getOutermostLocation()
+    if iobj!=shovel:
+        game.addText(( iobj.getArticle(True) + iobj.verbose_name).capitalize() + " is not a good tool for digging. ")
+    elif loc == shore8:
+        if compass.location:
+            game.addText("You've already dug here enough. ")
+            return False
+        else:
+            game.addText("You begin to dig up the buried wreck. With the shovel, you are able to uncover much, and quickly. Most of what you find is simply debris - chunks of waterlogged wood, with the occasional mangled fastening - nothing you have any use for. You're on the verge of quitting, when your shovel scrapes agaist something smooth, and hard. You feel around the object with the shovel, before scooping it up in a clump of damp sand. <br><br>As you brush the sand from the object, you find that it is a compass.  The casing is rusty, but intact.  The inside appears dry and the needle turns smoothly. Even the calibration seems right. If Ket insists on keeping your compass, this will work as a replacement until you can get a new one. <br><br>You dig a little more, but find nothing else of value. Most likely, this wreck has already yielded all its treasures. ")
+            game.addText("(Received: rusty compass)")
+            shore8.floor.describeThing("The sand here is uneven from your digging. ")
+            shore8.floor.xdescribeThing("The sand here is uneven from your digging. ")
+            me.addThing(compass)
+            
+            compassAchievement.award(game)
+            #hints.closeNode(digWreckHintNode)
+            if not myboat.broken and compass.location and not boat_sail.broken:
+                part1EndCut(game)
+            return True
+    elif loc == cave7:
+        if not me.containsItem(opal) and not cave7.containsItem(opal):
+            game.addText("You came down here to bury the opal. You should go get it before you start digging. ")
+            return False
+        elif not me.containsItem(opal):
+            from intficpy.verb import getVerb
+            game.addText("(First trying to take the opal)")
+            success = getVerb.verbFunc(game, opal)
+            if not success:
+                return Falsef
+        buryWithVerb.verbFunc(game, opal, shovel)
+        return True
+    else:
+        game.addText("There's no reason to dig here. ")
+        return False
 # replace the default verbFunc method
 digWithVerb.verbFunc = digWithVerbFunc
 
@@ -728,17 +746,17 @@ digVerb.hasDobj = False
 digVerb.dscope = "near"
 
 def digVerbFunc(game):
-	"""Dig
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
-	loc = me.getOutermostLocation()
-	if shovel.ix in me.contains or shovel.ix in me.sub_contains:
-		digWithVerb.verbFunc(game, shovel)
-	elif loc != shore8:
-		game.addText("There's no reason to dig here. ")
-	elif compass.location:
-		game.addText("You've already dug here enough. ")
-	else:
-		game.addText("You dig in the sand a bit with your hands. It's not very effective. ")
+    """Dig
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
+    loc = me.getOutermostLocation()
+    if shovel.ix in me.contains or shovel.ix in me.sub_contains:
+        digWithVerb.verbFunc(game, shovel)
+    elif loc != shore8:
+        game.addText("There's no reason to dig here. ")
+    elif compass.location:
+        game.addText("You've already dug here enough. ")
+    else:
+        game.addText("You dig in the sand a bit with your hands. It's not very effective. ")
 
 # replace the default verbFunc method
 digVerb.verbFunc = digVerbFunc
@@ -755,30 +773,29 @@ turnToVerb.iscope = "text"
 turnToVerb.preposition = ["to"]
 
 def turnToVerbFunc(game, dobj, iobj):
-	"""Repair something using a tool
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	if dobj!=dial1:
-		game.addText("There's no reason to turn " + dobj.getArticle(True) + dobj.verbose_name + ". ")
-		return False
-	elif not iobj.isdigit():
-		game.addText("The dial only is labeled with numbers 0 to 30. ")
-		return False
-	elif not (int(iobj) >= 0 and int(iobj) < 31):
-		game.addText("The dial is only labeled with numbers 0 to 30. ")
-		return False
-	else:
-		game.addText("You turn the dial. ")
-		if dial1.code[dial1.cur_digit]==iobj:
-			dial1.cur_digit = dial1.cur_digit + 1
-			if dial1.cur_digit==4:
-				c3lock.makeUnlocked()
-				game.addText("You hear a loud click from the door to the east. ")
-				global special_box_style
-				
-				#hints.closeNode(sequenceHintNode)
-				combinationLockAchievement.award(game)
-		else:
-			dial1.cur_digit = 0
+    """Repair something using a tool
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    if dobj!=dial1:
+        game.addText("There's no reason to turn " + dobj.getArticle(True) + dobj.verbose_name + ". ")
+        return False
+    elif not iobj.isdigit():
+        game.addText("The dial only is labeled with numbers 0 to 30. ")
+        return False
+    elif not (int(iobj) >= 0 and int(iobj) < 31):
+        game.addText("The dial is only labeled with numbers 0 to 30. ")
+        return False
+    else:
+        game.addText("You turn the dial. ")
+        if dial1.code[dial1.cur_digit]==iobj:
+            dial1.cur_digit = dial1.cur_digit + 1
+            if dial1.cur_digit==4:
+                c3lock.makeUnlocked()
+                game.addText("You hear a loud click from the door to the east. ")
+                
+                #hints.closeNode(sequenceHintNode)
+                combinationLockAchievement.award(game)
+        else:
+            dial1.cur_digit = 0
 
 # replace the default verbFunc method
 turnToVerb.verbFunc = turnToVerbFunc
@@ -791,13 +808,13 @@ countVerb.hasDobj = True
 countVerb.dscope = "near"
 
 def countVerbFunc(game, dobj):
-	"""Count something
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
-	if dobj==nwdots:
-		game.addText("You count 28 dots on the southwest monolith. ")
-		return True
-	else:
-		game.addText("There's no reason to count that. ")
+    """Count something
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
+    if dobj==nwdots:
+        game.addText("You count 28 dots on the southwest monolith. ")
+        return True
+    else:
+        game.addText("There's no reason to count that. ")
 
 # replace the default verbFunc method
 countVerb.verbFunc = countVerbFunc
@@ -823,29 +840,29 @@ breakWithVerb.iscope = "inv"
 breakWithVerb.preposition = ["with", "using"]
 
 def breakWithVerbFunc(game, dobj, iobj):
-	"""break something using a tool
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	global rock_barriers
-	if dobj==cursedstar:
-		breakStar(game)
-	elif dobj not in rock_barriers:
-		game.addText("Violence isn't the answer to this one. ")
-		return False
-	elif iobj == shovel:
-		game.addText("Trying to break through the rocks with a shovel is more likely to destroy the shovel. ")
-		return False
-	elif iobj != pickaxe:
-		game.addText(iobj.getArticle(True) + iobj.verbose_name + " is probably not the best tool for breaking through these rocks. ")
-	else:
-		game.addText("Using the pickaxe, you break through the rocks. ")
-		rubble_instance = rubble.copyThing()
-		dobj.location.addThing(rubble_instance)
-		dobj.location.removeThing(dobj)
-		try:
-			dobj.crushFunc(game)
-		except:
-			pass
-		return True
+    """break something using a tool
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    global rock_barriers
+    if dobj==cursedstar:
+        breakStar(game)
+    elif dobj not in rock_barriers:
+        game.addText("Violence isn't the answer to this one. ")
+        return False
+    elif iobj == shovel:
+        game.addText("Trying to break through the rocks with a shovel is more likely to destroy the shovel. ")
+        return False
+    elif iobj != pickaxe:
+        game.addText(iobj.getArticle(True) + iobj.verbose_name + " is probably not the best tool for breaking through these rocks. ")
+    else:
+        game.addText("Using the pickaxe, you break through the rocks. ")
+        rubble_instance = rubble.copyThing()
+        dobj.location.addThing(rubble_instance)
+        dobj.location.removeThing(dobj)
+        try:
+            dobj.crushFunc(game)
+        except:
+            pass
+        return True
 # replace the default verbFunc method
 breakWithVerb.verbFunc = breakWithVerbFunc
 
@@ -862,48 +879,47 @@ putAcrossVerb.iscope = "room"
 putAcrossVerb.preposition = ["across", "over"]
 
 def putAcrossVerbFunc(game, dobj, iobj):
-	"""Lay the board across the chasm
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	if dobj == woodboard and iobj == chasm4_2:
-		game.addText("You lay the wooden board across the chasm. ")
-		woodboard.location.removeThing(woodboard)
-		cave4_2.addThing(woodboard)
-		woodboard.invItem = False
-		woodboard.cannotTakeMsg = "You should probably leave the board here for now. "
-		woodboard.describeThing("A board has been lain across the chasm, forming a bridge. ")
-		cave4_2.south = cave4
-		board2 = woodboard.copyThing()
-		cave4.addThing(board2)
-	else:
-		game.addText("There's no reason to do that. ")
+    """Lay the board across the chasm
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    if dobj == woodboard and iobj == chasm4_2:
+        game.addText("You lay the wooden board across the chasm. ")
+        woodboard.location.removeThing(woodboard)
+        cave4_2.addThing(woodboard)
+        woodboard.invItem = False
+        woodboard.cannotTakeMsg = "You should probably leave the board here for now. "
+        woodboard.describeThing("A board has been lain across the chasm, forming a bridge. ")
+        cave4_2.south = cave4
+        board2 = woodboard.copyThing()
+        cave4.addThing(board2)
+    else:
+        game.addText("There's no reason to do that. ")
 # replace the default verbFunc method
 putAcrossVerb.verbFunc = putAcrossVerbFunc
 
 def _crystalCharge(game):
-	global special_box_style
-	loc = lightcrystal.getOutermostLocation()
-	if loc.dark and not lightcrystal.is_lit and lightcrystal.turns_left:
-		if me.getOutermostLocation() == loc:
-			game.addText("In the darkness, the crystal starts to glow. ")
-			#game.addText(str(lightcrystal.turns_left) + " turns of light remain. ")
-			lightcrystal.light(game)
-			loc.describe(game)
-		else:
-			lightcrystal.light(game)
-	elif not loc.dark and lightcrystal.is_lit:
-		game.addText("As it is exposed to the light, the crystal's glow fades. ")
-		lightcrystal.extinguish(game)
-		lightcrystal.turns_left = lightcrystal.turns_left + 1
-	elif not loc.dark and lightcrystal.turns_left==(lightcrystal.max_turns - 1):
-		if me.getOutermostLocation()==loc:
-			game.addText("The crystal is now fully charged. ")
-		lightcrystal.turns_left = lightcrystal.max_turns
-	elif not loc.dark and lightcrystal.turns_left < lightcrystal.max_turns:
-		lightcrystal.turns_left = lightcrystal.turns_left + 1
-	elif loc.dark and not lightcrystal.turns_left and loc.dark_visible_exits==[]:
-		#game.addText("It's too dark. You won't be able to find your way out. ")
-		
-		dark_ending.endGame(game)
+    loc = lightcrystal.getOutermostLocation()
+    if loc.dark and not lightcrystal.is_lit and lightcrystal.turns_left:
+        if me.getOutermostLocation() == loc:
+            game.addText("In the darkness, the crystal starts to glow. ")
+            #game.addText(str(lightcrystal.turns_left) + " turns of light remain. ")
+            lightcrystal.light(game)
+            loc.describe(game)
+        else:
+            lightcrystal.light(game)
+    elif not loc.dark and lightcrystal.is_lit:
+        game.addText("As it is exposed to the light, the crystal's glow fades. ")
+        lightcrystal.extinguish(game)
+        lightcrystal.turns_left = lightcrystal.turns_left + 1
+    elif not loc.dark and lightcrystal.turns_left==(lightcrystal.max_turns - 1):
+        if me.getOutermostLocation()==loc:
+            game.addText("The crystal is now fully charged. ")
+        lightcrystal.turns_left = lightcrystal.max_turns
+    elif not loc.dark and lightcrystal.turns_left < lightcrystal.max_turns:
+        lightcrystal.turns_left = lightcrystal.turns_left + 1
+    elif loc.dark and not lightcrystal.turns_left and loc.dark_visible_exits==[]:
+        #game.addText("It's too dark. You won't be able to find your way out. ")
+        
+        dark_ending.endGame(game)
 crystalCharge = Daemon(_crystalCharge)
 
 game.daemons.add(crystalCharge)
@@ -915,53 +931,52 @@ guardtower_woman.xdescribeThing("The woman from outside kneels by the door, sile
 storm_scene = 0
 storm_caves = 0
 def _goddessStormDaemon(game):
-	global storm_turns_left
-	global storm_scene
-	global storm_turns_left
-	global special_box_style
-	if storm_turns_left:
-		loc = me.getOutermostLocation()
-		if storm_scene==0 and loc==road24:
-			game.addText("A man runs past, holding a crying child under his soaked coat, doubtless headed for shelter. The rain pours down. ")
-			storm_scene += 1
-		elif storm_scene==1 and loc==square21:
-			game.addText("A woman pounds frantically on the door of the guard tower to the south. \"Please!\" she cries. \"The Blessed are dead! All of them! You have to help me.\"<br>The door falls open, and she scrambles in. ")
-			tower23.addThing(guardtower_woman)
-			storm_scene += 1
-		elif storm_scene==2 and loc==road18:
-			game.addText("The trees sway dangerously in the wind. ")
-			me.xdescribeThing("You are soaking wet from the rain. ")
-			storm_scene += 1
-		elif storm_scene==3 and loc==forest15:
-			if storm_turns_full - storm_turns_left < 10:
-				game.addText("The wind picks up, and it starts to hail. ")
-			storm_scene += 1
-		elif storm_scene==4 and loc==forest13:
-			game.addText("The hailstones hit you hard, stinging your skin. ")
-			storm_scene += 1
-		elif storm_scene==5 and loc==cave4_2:
-			game.addText("A sprinkling of sand falls from above as the earth around you shakes. ")
-			storm_scene += 1
-		if storm_turns_full - storm_turns_left == 10 and storm_scene < 4:
-			game.addText("The wind picks up, and it starts to hail. ")
-			me.xdescribeThing("You are soaking wet from the rain. ")
-		if storm_turns_left == 10:
-			game.addText("A crash of thunder shakes the ground. You don't have much time. ")
-		if storm_turns_left == 5:
-			game.addText("You feel the presence of the Goddess of the Storm, looming ever closer. ")
-		game.addText(str(storm_turns_left) + " turns left. ")
-		storm_turns_left -= 1
-	else:
-		game.addText("You have run out of time. ")
-		
-		if isinstance(loc, OutdoorRoom):
-			storm_outside_ending.endGame(game)
-		elif loc.room_group==cavegroup:
-			storm_cave_ending.endGame(game)
-		else:
-			storm_inside_ending.endGame(game)
-			
-		
+    global storm_turns_left
+    global storm_scene
+    global storm_turns_left
+    if storm_turns_left:
+        loc = me.getOutermostLocation()
+        if storm_scene==0 and loc==road24:
+            game.addText("A man runs past, holding a crying child under his soaked coat, doubtless headed for shelter. The rain pours down. ")
+            storm_scene += 1
+        elif storm_scene==1 and loc==square21:
+            game.addText("A woman pounds frantically on the door of the guard tower to the south. \"Please!\" she cries. \"The Blessed are dead! All of them! You have to help me.\"<br>The door falls open, and she scrambles in. ")
+            tower23.addThing(guardtower_woman)
+            storm_scene += 1
+        elif storm_scene==2 and loc==road18:
+            game.addText("The trees sway dangerously in the wind. ")
+            me.xdescribeThing("You are soaking wet from the rain. ")
+            storm_scene += 1
+        elif storm_scene==3 and loc==forest15:
+            if storm_turns_full - storm_turns_left < 10:
+                game.addText("The wind picks up, and it starts to hail. ")
+            storm_scene += 1
+        elif storm_scene==4 and loc==forest13:
+            game.addText("The hailstones hit you hard, stinging your skin. ")
+            storm_scene += 1
+        elif storm_scene==5 and loc==cave4_2:
+            game.addText("A sprinkling of sand falls from above as the earth around you shakes. ")
+            storm_scene += 1
+        if storm_turns_full - storm_turns_left == 10 and storm_scene < 4:
+            game.addText("The wind picks up, and it starts to hail. ")
+            me.xdescribeThing("You are soaking wet from the rain. ")
+        if storm_turns_left == 10:
+            game.addText("A crash of thunder shakes the ground. You don't have much time. ")
+        if storm_turns_left == 5:
+            game.addText("You feel the presence of the Goddess of the Storm, looming ever closer. ")
+        game.addText(str(storm_turns_left) + " turns left. ")
+        storm_turns_left -= 1
+    else:
+        game.addText("You have run out of time. ")
+        
+        if isinstance(loc, OutdoorRoom):
+            storm_outside_ending.endGame(game)
+        elif loc.room_group==cavegroup:
+            storm_cave_ending.endGame(game)
+        else:
+            storm_inside_ending.endGame(game)
+            
+        
 goddessStormDaemon = Daemon(_goddessStormDaemon)
 
 
@@ -976,33 +991,32 @@ buryWithVerb.iscope = "inv"
 buryWithVerb.preposition = ["with", "using"]
 
 def buryWithVerbFunc(game, dobj, iobj):
-	"""bury something using a tool
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
-	loc = me.getOutermostLocation()
-	if dobj!=opal:
-		game.addText("There's no reason to bury " + dobj.getArticle(True) + dobj.verbose_name + ". ")
-		return False
-	if loc != cave7:
-		game.addText("You should go to the bottom of the caverns to bury the opal. ")
-		return False
-	if iobj != shovel:
-		game.addText(iobj.capNameArticle(True) + " isn't the best tool for the job. ")
-		return False
-	game.addText("Using the shovel, you bury the opal in the ground, deep in the caverns. ")
-	me.removeThing(opal)
-	# CHECK FOR FREE PEOPLE
-	global storm_turns_left
-	global storm_turns_full
-	global special_box_style
-	if goddessStormDaemon in game.daemons.active:
-		game.daemons.remove(goddessStormDaemon)
-	
-	if storm_turns_left < storm_turns_full:
-		storm_success_ending.endGame(game)
-	else:
-		mass_murder_ending.endGame(game)
-	
-	opalAchievement.award(game)
+    """bury something using a tool
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing, and iobj, a Thing """
+    loc = me.getOutermostLocation()
+    if dobj!=opal:
+        game.addText("There's no reason to bury " + dobj.getArticle(True) + dobj.verbose_name + ". ")
+        return False
+    if loc != cave7:
+        game.addText("You should go to the bottom of the caverns to bury the opal. ")
+        return False
+    if iobj != shovel:
+        game.addText(iobj.capNameArticle(True) + " isn't the best tool for the job. ")
+        return False
+    game.addText("Using the shovel, you bury the opal in the ground, deep in the caverns. ")
+    me.removeThing(opal)
+    # CHECK FOR FREE PEOPLE
+    global storm_turns_left
+    global storm_turns_full
+    if goddessStormDaemon in game.daemons.active:
+        game.daemons.remove(goddessStormDaemon)
+    
+    if storm_turns_left < storm_turns_full:
+        storm_success_ending.endGame(game)
+    else:
+        mass_murder_ending.endGame(game)
+    
+    opalAchievement.award(game)
 # replace the default verbFunc method
 buryWithVerb.verbFunc = buryWithVerbFunc
 
@@ -1014,21 +1028,21 @@ buryVerb.hasDobj = True
 buryVerb.dscope = "inv"
 
 def buryVerbFunc(game, dobj):
-	"""Redriect to bury with
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
-	loc = me.getOutermostLocation()
-	if dobj!=opal:
-		game.addText("There's no reason to bury " + dobj.getArticle(True) + dobj.verbose_name + ". ")
-		return False
-	if loc != cave7:
-		game.addText("You should go to the bottom of the caverns to bury the opal. ")
-		return False
-	if me.containsItem(shovel):
-		buryWithVerb.verbFunc(game, dobj, shovel)
-		return True
-	else:
-		game.addText("You try digging a hole in the cave floor with your hands. It's not very effective. ")
-		return False
+    """Redriect to bury with
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, dobj, a Thing """
+    loc = me.getOutermostLocation()
+    if dobj!=opal:
+        game.addText("There's no reason to bury " + dobj.getArticle(True) + dobj.verbose_name + ". ")
+        return False
+    if loc != cave7:
+        game.addText("You should go to the bottom of the caverns to bury the opal. ")
+        return False
+    if me.containsItem(shovel):
+        buryWithVerb.verbFunc(game, dobj, shovel)
+        return True
+    else:
+        game.addText("You try digging a hole in the cave floor with your hands. It's not very effective. ")
+        return False
 
 # replace the default verbFunc method
 buryVerb.verbFunc = buryVerbFunc
@@ -1040,9 +1054,9 @@ prayVerb.syntax = [["pray"]]
 prayVerb.hasDobj = False
 
 def prayVerbFunc(game):
-	"""Pray
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app """
-	game.addText("You stop for a moment, and pray, to no deity in particular. ")
+    """Pray
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app """
+    game.addText("You stop for a moment, and pray, to no deity in particular. ")
 
 # replace the default verbFunc method
 prayVerb.verbFunc = prayVerbFunc
@@ -1057,14 +1071,14 @@ prayToVerb.iscope = "knows"
 prayToVerb.preposition = ["to"]
 
 def prayToVerbFunc(game, iobj):
-	"""Pray to a deity
-	Takes arguments me, pointing to the player, app, the PyQt5 GUI app, iobj, a Thing """
-	if iobj.known_ix != goddess_abs.known_ix:
-		game.addText("There's no reason to pray to that. ")
-		return False
-	game.addText("You stop for a moment, and pray to the Goddess of the Storm. You have a sense of something vast and inhuman watching you. ")
-	goddess_abs.printSuggestions(game)
-	
+    """Pray to a deity
+    Takes arguments me, pointing to the player, app, the PyQt5 GUI app, iobj, a Thing """
+    if iobj.known_ix != goddess_abs.known_ix:
+        game.addText("There's no reason to pray to that. ")
+        return False
+    game.addText("You stop for a moment, and pray to the Goddess of the Storm. You have a sense of something vast and inhuman watching you. ")
+    goddess_abs.printSuggestions(game)
+    
 
 # replace the default verbFunc method
 prayToVerb.verbFunc = prayToVerbFunc
@@ -1076,10 +1090,10 @@ window0.describeThing("")
 window0.xdescribeThing("The window is cracked, and dirty. ")
 window0.invItem = False
 def window0LookThrough(game):
-	if storm_turns_left < storm_turns_full:
-		game.addText("So much rain is streaming down the glass that you can't see much of anything. ")
-	else:
-		game.addText("Outside, you can see a sandy beach, meeting the ocean to the north. ")
+    if storm_turns_left < storm_turns_full:
+        game.addText("So much rain is streaming down the glass that you can't see much of anything. ")
+    else:
+        game.addText("Outside, you can see a sandy beach, meeting the ocean to the north. ")
 window0.lookThrough = window0LookThrough
 shack0.addThing(window0)
 
@@ -1089,10 +1103,10 @@ arai.describeThing(f"{arai.capNameArticle(False)} sits in a corner, reading a th
 arai.xdescribeThing(f"{arai.capNameArticle(True)} is small and slight, with dark brown hair down to her knees. ")
 arai_hi1 = Topic(f"\"You're awake,\" {arai.lowNameArticle(True)} says. \"My name is Arai. I rescued you. The protective enchantment I placed on you is strong, but the Storm is stronger. You should keep your head down for now.\" ")
 def araiHi1(app, suggest=True):
-	game.addText(arai_hi1.text)
-	arai.makeProper("Arai")
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_hi1.text)
+    arai.makeProper("Arai")
+    if suggest:
+        arai.printSuggestions(game)
 arai_hi1.func = araiHi1
 arai_book = Thing("book")
 arai_book.read_desc = f"You can't see much of the text over {arai.lowNameArticle(True)}'s shoulder. "
@@ -1108,72 +1122,72 @@ arai_warning2 = Topic(f"\"Just don't drink the Kaur, whatever you do,\" says {ar
 arai_how = SpecialTopic("ask how you got here", f"\"I brought you here,\" says Arai. \"The Storm nearly took you, but I intervened. You're safe now.\" ")
 arai_how.addAlternatePhrasing("ask how did i you get got here")
 def araiHow(app, suggest=True):
-	game.addText(arai_how.text)
-	arai.removeSpecialTopic(arai_how)
-	arai.addSpecialTopic(arai_storm_special)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_how.text)
+    arai.removeSpecialTopic(arai_how)
+    arai.addSpecialTopic(arai_storm_special)
+    if suggest:
+        arai.printSuggestions(game)
 arai_how.func = araiHow
 arai_us = SpecialTopic("ask what she meant by 'the likes of us'", f"\"I'm like you,\" says Arai. \"I was born here, but I'm not under Her protection either. I broke free.\" ")
 def araiUs(app, suggest=True):
-	game.addText(arai_us.text)
-	arai.removeSpecialTopic(arai_us)
-	arai.addSpecialTopic(arai_her)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_us.text)
+    arai.removeSpecialTopic(arai_us)
+    arai.addSpecialTopic(arai_her)
+    if suggest:
+        arai.printSuggestions(game)
 arai_us.func = araiUs
 arai_storm_special = SpecialTopic("ask about the Storm", f"\"If you don't know already, I won't burden you with the knowledge,\" says Arai. \"You're better off not knowing. I wish I'd had that option.\"")
 arai_storm = Topic(arai_storm_special.text)
 arai.addTopic("ask", arai_storm, storm_abs)
 def araiStorm(app, suggest=True):
-	game.addText(arai_storm_special.text)
-	arai.removeSpecialTopic(arai_storm_special)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_storm_special.text)
+    arai.removeSpecialTopic(arai_storm_special)
+    if suggest:
+        arai.printSuggestions(game)
 arai_storm_special.func = araiStorm
 arai_storm.func = araiStorm
 arai_key = Topic("Arai stiffens. \"That's nothing,\" she says. \"Put it back where you found it. Hell, throw it into the sea.\" She glances nervously toward the bed. ")
 arai_key_special = SpecialTopic("ask about the silver key", arai_key.text)
 arai_her = SpecialTopic("ask who 'Her' is", "Arai bites her lip, and looks down at her feet. ")
 def araiHer(app, suggest=True):
-	game.addText(arai_her.text)
-	arai.removeSpecialTopic(arai_her)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_her.text)
+    arai.removeSpecialTopic(arai_her)
+    if suggest:
+        arai.printSuggestions(game)
 arai_her.func = araiHer
 arai_leave = SpecialTopic("ask her to unlock the door", f"\"It's dangerous outside, for the likes of us,\" says Arai. \"Just stay here for now.\"")
 def araiLeave(app, suggest=True):
-	game.addText(arai_leave.text)
-	arai.removeSpecialTopic(arai_leave)
-	arai.addSpecialTopic(arai_us)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_leave.text)
+    arai.removeSpecialTopic(arai_leave)
+    arai.addSpecialTopic(arai_us)
+    if suggest:
+        arai.printSuggestions(game)
 arai_leave.func = araiLeave
 # PART 1 END CUTSCENE
 def part1EndCut(game):
-	
-	#hints.closeNode(meetKetHintNode)
-	arai.location.removeThing(arai)
-	#shore6.addThing(arai)
-	loc = me.getOutermostLocation()
-	loc.addThing(arai)
-	arai.xdescribeThing("Arai looks at you thoughtfully. ")
-	#arai.default_topic = arai_hi2
-	arai.makeProper("Arai")
-	arai.describeThing("Arai stands here, looking at you expectantly.")
-	arai.xdescribeThing("Arai is small and slight, with dark brown hair down to her knees. ")
-	#arai.makeProper("Arai")
-	game.addText("Arai walks up to you as you finish. \"I see you've nearly finished your boat,\" she says. \"You still need a power crystal, though. I could give you one, but you'd just get killed as soon as you set sail. Unless, that is, you removed the Storm. I've been watching you. You're smart. You're resourceful. Maybe you'll be able to do what I couldn't. Maybe you can send Her back to where she came from. I can tell you exactly what to do. You just have to trust me.\" ")
-	arai.hermit_topic = None
-	arai.removeAllTopics()
-	arai.removeAllSpecialTopics()
-	arai.addSpecialTopic(arai_p2_plan)
-	arai.addSpecialTopic(arai_p2_trust)
-	arai.default_topic = arai_p2_default1
-	arai.setHiTopics(None, None)
-	arai.printSuggestions(game)
-	goddess_abs.level = 2
-	#hints.closeNode(fixBoatHintNode)
+    
+    #hints.closeNode(meetKetHintNode)
+    arai.location.removeThing(arai)
+    #shore6.addThing(arai)
+    loc = me.getOutermostLocation()
+    loc.addThing(arai)
+    arai.xdescribeThing("Arai looks at you thoughtfully. ")
+    #arai.default_topic = arai_hi2
+    arai.makeProper("Arai")
+    arai.describeThing("Arai stands here, looking at you expectantly.")
+    arai.xdescribeThing("Arai is small and slight, with dark brown hair down to her knees. ")
+    #arai.makeProper("Arai")
+    game.addText("Arai walks up to you as you finish. \"I see you've nearly finished your boat,\" she says. \"You still need a power crystal, though. I could give you one, but you'd just get killed as soon as you set sail. Unless, that is, you removed the Storm. I've been watching you. You're smart. You're resourceful. Maybe you'll be able to do what I couldn't. Maybe you can send Her back to where she came from. I can tell you exactly what to do. You just have to trust me.\" ")
+    arai.hermit_topic = None
+    arai.removeAllTopics()
+    arai.removeAllSpecialTopics()
+    arai.addSpecialTopic(arai_p2_plan)
+    arai.addSpecialTopic(arai_p2_trust)
+    arai.default_topic = arai_p2_default1
+    arai.setHiTopics(None, None)
+    arai.printSuggestions(game)
+    goddess_abs.level = 2
+    #hints.closeNode(fixBoatHintNode)
 
 arai_p2_default1 = f"\"Will you help me then?\" Arai asks. \"Will you - \" she drops to a whisper here. \"Will you banish the Goddess of the Storm?\""
 arai_p2_default2 = f"\"Have you been down in the caverns yet?\" Arai asks. \"The entrance is in the ruin. Just follow the path east into the woods from the road north of town.\""
@@ -1182,72 +1196,72 @@ arai_p2_default3 = f"\"Made any progress?\" Arai asks. \"Anything I can help you
 arai_p2_plan = SpecialTopic("ask what her plan is", "Arai glances around. \"Remember the stone you took from my house?\" she says softly. \"It's the seat of the Storm's power in this world. Her domain is the sky. If we bury her vessel deep enough, she won't be able to exist in this world. She'll disappear, and this island - well, <i>we'll</i> be free. You'll have to go down to the bottom of the caves. I've cleared a lot of the traps and curses out, but what I'm asking you to do is still not exactly safe. Unfortunately, it's the only way you'll get off this island alive. Will you do it?\" ")
 arai_p2_plan.addAlternatePhrasing("ask what is her your arais plan")
 def araiP2Plan(app, suggest=True):
-	game.addText(arai_p2_plan.text)
-	arai.removeSpecialTopic(arai_p2_plan)
-	arai.removeSpecialTopic(arai_p2_trust)
-	arai.addSpecialTopic(arai_p2_plan2)
-	arai.addSpecialTopic(arai_p2_plan3)
-	arai.addSpecialTopic(arai_p2_plan4)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_p2_plan.text)
+    arai.removeSpecialTopic(arai_p2_plan)
+    arai.removeSpecialTopic(arai_p2_trust)
+    arai.addSpecialTopic(arai_p2_plan2)
+    arai.addSpecialTopic(arai_p2_plan3)
+    arai.addSpecialTopic(arai_p2_plan4)
+    if suggest:
+        arai.printSuggestions(game)
 arai_p2_plan.func = araiP2Plan
 arai_p2_plan2 = SpecialTopic("agree to the plan", "Arai breathes a sigh of relief. \"Good,\" she says. \"The entrance to the caverns is in the ruin to the east of the mountain path - the one that runs north to south. You'll need a light source. Make sure it doesn't go out while you're down there. You'll also need this.\" Arai pulls a lens from her pocket, and holds it out for you to see. \"I've enchanted this. Looking through it will allow you to see past many common concealment charms. Use it in the first cavern to find the entrance to the rest of the caves. Beyond that, there are three levels. I've never made it to the bottom, but maybe it'll be easier for you . . . \" She trails off. Not quite looking at you, Arai continues. \"Please come talk to me if there's something you can't figure out. I don't want to make you do this alone, I just - I don't ever want to go back down there again. I'm sure it won't affect you the same way, but we'll deal with that when it comes.\" She hands you the lens. ")
 def araiP2Plan2(app, suggest=True):
-	#hints.closeNode(part2HintNode)
-	game.addText(arai_p2_plan2.text)
-	me.addThing(lens)
-	game.addText("(Received: Arai's enchanted lens)")
-	arai.removeSpecialTopic(arai_p2_plan2)
-	arai.removeSpecialTopic(arai_p2_plan3)
-	arai.removeSpecialTopic(arai_p2_plan4)
-	arai.default_topic = arai_p2_default2
-	if suggest:
-		arai.printSuggestions(game)
+    #hints.closeNode(part2HintNode)
+    game.addText(arai_p2_plan2.text)
+    me.addThing(lens)
+    game.addText("(Received: Arai's enchanted lens)")
+    arai.removeSpecialTopic(arai_p2_plan2)
+    arai.removeSpecialTopic(arai_p2_plan3)
+    arai.removeSpecialTopic(arai_p2_plan4)
+    arai.default_topic = arai_p2_default2
+    if suggest:
+        arai.printSuggestions(game)
 arai_p2_plan2.func = araiP2Plan2
 arai_p2_plan3 = SpecialTopic("tell her you need to think about it", "Arai sighs. \"Of course,\" she says. \"We're not on a deadline. Take all the time you need.\" ")
 arai_p2_plan4 = SpecialTopic("refuse", f"\"I hope you'll reconsider,\" Arai says. \"I'll be here.\" ")
 def araiP2Plan4(app, suggest=True):
-	game.addText(arai_p2_plan4.text)
-	arai.removeSpecialTopic(arai_p2_plan4)
-	arai.removeSpecialTopic(arai_p2_plan3)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_p2_plan4.text)
+    arai.removeSpecialTopic(arai_p2_plan4)
+    arai.removeSpecialTopic(arai_p2_plan3)
+    if suggest:
+        arai.printSuggestions(game)
 arai_p2_plan4.func = araiP2Plan4
 arai_p2_trust = SpecialTopic("tell her you don't trust her", f"\"Fair enough,\" Arai says. \"All the same, I hope you'll at least consider my plan.\" ")
 arai_p2_trust.addAlternatePhrasing("i don't trust her you")
 def araiP2Trust(app, suggest=True):
-	game.addText(arai_p2_trust.text)
-	arai.removeSpecialTopic(arai_p2_trust)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_p2_trust.text)
+    arai.removeSpecialTopic(arai_p2_trust)
+    if suggest:
+        arai.printSuggestions(game)
 arai_p2_trust.func = araiP2Trust
 arai_p2_vellum1 = SpecialTopic("tell her what you learned from the vellum sheet", "Arai's face falls. \"I'm sorry,\" she says. \"I've known from the beginning. I should have told you up front. You were going to find out on your own. If the Storm is banished, Her devoted will die. I understand if you don't want to carry on with the plan, but if we work together, there might be a way we can free the islanders.\"")
 def araiP2Vellum1(app, suggest=True):
-	game.addText(arai_p2_vellum1.text)
-	arai.removeSpecialTopic(arai_p2_vellum1)
-	arai.removeSpecialTopic(arai_p2_vellum2)
-	arai.addSpecialTopic(arai_p2_islanders)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_p2_vellum1.text)
+    arai.removeSpecialTopic(arai_p2_vellum1)
+    arai.removeSpecialTopic(arai_p2_vellum2)
+    arai.addSpecialTopic(arai_p2_islanders)
+    if suggest:
+        arai.printSuggestions(game)
 arai_p2_vellum1.func = araiP2Vellum1
 arai_p2_journal1 = SpecialTopic("tell her what you learned from the journal", "Arai's face falls. \"You found my old journal, huh?\" she says. \"I'm sorry. I should have told you up front what would happen if we buried the stone. You were going to find out on your own. If the Storm is banished, Her devoted will die. I understand if you don't want to carry on with the plan, but if we work together, there might be a way we can free the islanders.\"")
 def araiP2Journal1(app, suggest=True):
-	game.addText(arai_p2_journal1.text)
-	arai.removeSpecialTopic(arai_p2_journal1)
-	arai.removeSpecialTopic(arai_p2_vellum2)
-	arai.addSpecialTopic(arai_p2_islanders)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_p2_journal1.text)
+    arai.removeSpecialTopic(arai_p2_journal1)
+    arai.removeSpecialTopic(arai_p2_vellum2)
+    arai.addSpecialTopic(arai_p2_islanders)
+    if suggest:
+        arai.printSuggestions(game)
 arai_p2_journal1.func = araiP2Journal1
 arai_p2_vellum2 = SpecialTopic("accuse her of trying to trick you into mass murder", "Arai sucks in her breath. \"I'm sorry,\" she says. \"I'm so sorry. Yes, they'll die if we bury the stone. Yes, I've known from the beginning. Yes, I should have told you. I understand if you don't want anything to do with me anymore, but I think there might be a way we can free the islanders. I'll be here, if you want to try.\" ")
 def araiP2Vellum2(app, suggest=True):
-	game.addText(arai_p2_vellum2.text)
-	arai.removeSpecialTopic(arai_p2_vellum1)
-	arai.removeSpecialTopic(arai_p2_journal1)
-	arai.removeSpecialTopic(arai_p2_vellum2)
-	arai.addSpecialTopic(arai_p2_islanders)
-	if suggest:
-		arai.printSuggestions(game)
+    game.addText(arai_p2_vellum2.text)
+    arai.removeSpecialTopic(arai_p2_vellum1)
+    arai.removeSpecialTopic(arai_p2_journal1)
+    arai.removeSpecialTopic(arai_p2_vellum2)
+    arai.addSpecialTopic(arai_p2_islanders)
+    if suggest:
+        arai.printSuggestions(game)
 arai_p2_vellum2.func = araiP2Vellum2
 arai_p2_islanders = SpecialTopic("ask how the islanders can be freed", "Arai frowns. \"Most of the ways we could break the islanders' connection to the Storm from the outside risk killing them all. If we're going to get them free, we have to get the Goddess to release them Herself. As for how to do that, I'm not really sure.\" ")
 
@@ -1261,75 +1275,73 @@ underbed0.addThing(opalbox)
 opalbox.setAdjectives(["small", "wooden"])
 opalbox.giveLid()
 def openOpalBox(game):
-	from intficpy.verb import openVerb
-	openVerb.verbFunc(game, opalbox, True)
-	if me.containsItem(opalbox) and not opaltaken:
-		opalCutscene(game)
-	return False
+    from intficpy.verb import openVerb
+    openVerb.verbFunc(game, opalbox, True)
+    if me.containsItem(opalbox) and not opaltaken:
+        opalCutscene(game)
+    return False
 opalbox.openVerbDobj = openOpalBox
 
 def takeOpalBox(game):
-	from intficpy.verb import getVerb
-	getVerb.verbFunc(game, opalbox, True)
-	if opalbox.containsItem(opal) and not opaltaken  and opalbox.is_open:
-		opalCutscene(game)
-	return False
+    from intficpy.verb import getVerb
+    getVerb.verbFunc(game, opalbox, True)
+    if opalbox.containsItem(opal) and not opaltaken  and opalbox.is_open:
+        opalCutscene(game)
+    return False
 opalbox.getVerbDobj = takeOpalBox
-	
+    
 opal = Thing("opal")
 opal.size = 15
 
 opaltaken = False
 def opalCutscene(game):
-	global opaltaken
-	opaltaken = True
-	
-	if me.location==shack1:
-		game.addText(f"{arai.capNameArticle(True)} emerges at the top of the ladder, a look of fury on her face. ")
-	else:
-		game.addText(f"{arai.capNameArticle(True)} looks up from her reading. Her eyes widen as she sees you. ")
-	arai.describeThing(f"{arai.capNameArticle(True)} keeps her wide eyes fixed on you. ")
-	game.addText(f"\"What have you done?\" says {arai.lowNameArticle(True)} , her voice nearly a whisper. \"You . . . you take that <i>thing</i> and get out of my house.\" <br> She grabs you by the arm, and leads you to the door. \"If you want to live, you will tell no one of what you have taken from me, or of where you found it,\" she says. <br> {arai.capNameArticle(True)} unlocks the shack door, opens it, and pushes you out. ")
-	game.addText("You hear a click as the shack door locks. ")
-	me.location.removeThing(me)
-	shore2.addThing(me)
-	global special_box_style
-	
-	outShackAchievement.award(game)
-	##hints.setNode(findBoatHintNode)
-	#hints.closeNode(shackHintNode)
+    global opaltaken
+    opaltaken = True
+    
+    if me.location==shack1:
+        game.addText(f"{arai.capNameArticle(True)} emerges at the top of the ladder, a look of fury on her face. ")
+    else:
+        game.addText(f"{arai.capNameArticle(True)} looks up from her reading. Her eyes widen as she sees you. ")
+    arai.describeThing(f"{arai.capNameArticle(True)} keeps her wide eyes fixed on you. ")
+    game.addText(f"\"What have you done?\" says {arai.lowNameArticle(True)} , her voice nearly a whisper. \"You . . . you take that <i>thing</i> and get out of my house.\" <br> She grabs you by the arm, and leads you to the door. \"If you want to live, you will tell no one of what you have taken from me, or of where you found it,\" she says. <br> {arai.capNameArticle(True)} unlocks the shack door, opens it, and pushes you out. ")
+    game.addText("You hear a click as the shack door locks. ")
+    me.location.removeThing(me)
+    shore2.addThing(me)
+    
+    outShackAchievement.award(game)
+    ##hints.setNode(findBoatHintNode)
+    #hints.closeNode(shackHintNode)
 
 def opalTake(game):
-	from intficpy.verb import getVerb
-	getVerb.verbFunc(game, opal, True)
-	if not opaltaken:
-		opalCutscene(game)
-	return False
+    from intficpy.verb import getVerb
+    getVerb.verbFunc(game, opal, True)
+    if not opaltaken:
+        opalCutscene(game)
+    return False
 opal.getVerbDobj = opalTake
 def opalGiveShow(game, dobj):
-	global special_box_style
-	if dobj.ix==goddess_abs.ix:
-		game.addText("Nothing happens. ")
-	elif dobj==arai:
-		game.addText(f"\"Put that away!\" {arai.lowNameArticle(True)} hisses. ")
-		return False
-	elif dobj==blessed22:
-		game.addText("You hold out the opal for the seven to see. For a moment, it appears they haven't noticed, but you have a sense of growing tension. You realize they've been staring at you, all of them, almost unblinking - no, literally unblinking. You glance over your shoulder to find that two of them are now behind you. When did that happen? You've been watching them the whole time. <br><br>As you turn to look back at the others, all seven step forward in unison. Their faces are empty, and impossibly still. They step forward again. You are surrounded. You need to escape. You bolt, running between the youngest and the oldest, in hopes that they will be the weakest link. The tiny girl grabs you by the wrist as you try to slip past, not even turning to look as she does so. Her grip is tight. It <i>hurts</i>, and you're no stranger to pain. <br><br>You pull against her. Your heart pounds. Her small arm rotates impossibly behind her back, but she does not budge. It is as if her humanity were simply a pretence, now abandoned. It is if <i>the restrictions of physics</i> were merely a pretense. The others gather round you once more. Each of them places a hand on your body. You try to pull away, but there is nowhere to go. Constricted by the girl's grip, your arm starts to go numb. <br><br>You fight to free yourself, but you are weakening. It must be the exhaustion of trying to resist the impossible strength of the seven - but no, that's not it. There's something else. Your heart has slowed, and the tingling has spread to most of your body. You're struggling to keep your eyes open. The life is being sucked out of you. You need to act fast - you need a plan - but your mind is dimming, along with your body. You need to get out of here. You need to get out of here. You need - ")
-	elif dobj==villagers20:
-		game.addText("You hold out the opal for the others in the pub to see. Everyone turns to stare stares at it. All at once, their faces go slack. A young woman stands up from her table. She pauses for a moment, before leaping at you, and tackling you to the ground. The others look on, silently. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
-	elif dobj==villagers21:
-		game.addText("You hold out the opal for the villagers to see. Everyone turns to stare stares at it. All at once, their faces go slack. A young man takes a few steps toward you. He pauses for a moment, before leaping at you, and tackling you to the ground. The others look on, silently. He covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. His strength is incredible. You fight against him with everything you have, and scream, though his hand muffles you. He does not budge. He does not flinch. He does not blink. He does not blink at all. A shiver runs through your immobilized body as you look into his eyes, and see a depth, an emptiness that cannot be human. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
-	elif dobj in [vendor, picker, nurse25, daughter]:
-		game.addText("You hold out the opal. " + dobj.capNameArticle(True) + " stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
-	elif dobj in [children21, woman21, man21]:
-			return True
-	elif dobj == patients25:
-			game.addText("You hold out the opal for the patients to see. The nurse catches sight of it, and takes a few steps toward you. She stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
-	else:
-		game.addText("You hold out the opal. " + dobj.capNameArticle(True) + " stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. He covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of his body. His strength is incredible. You fight against him with everything you have, and scream, though his hand muffles you. He does not budge. He does not flinch. He does not blink. He does not blink at all. A shiver runs through your immobilized body as you look into his eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
-	
-	opal_show_ending.endGame(game)
-	return False
+    if dobj.ix==goddess_abs.ix:
+        game.addText("Nothing happens. ")
+    elif dobj==arai:
+        game.addText(f"\"Put that away!\" {arai.lowNameArticle(True)} hisses. ")
+        return False
+    elif dobj==blessed22:
+        game.addText("You hold out the opal for the seven to see. For a moment, it appears they haven't noticed, but you have a sense of growing tension. You realize they've been staring at you, all of them, almost unblinking - no, literally unblinking. You glance over your shoulder to find that two of them are now behind you. When did that happen? You've been watching them the whole time. <br><br>As you turn to look back at the others, all seven step forward in unison. Their faces are empty, and impossibly still. They step forward again. You are surrounded. You need to escape. You bolt, running between the youngest and the oldest, in hopes that they will be the weakest link. The tiny girl grabs you by the wrist as you try to slip past, not even turning to look as she does so. Her grip is tight. It <i>hurts</i>, and you're no stranger to pain. <br><br>You pull against her. Your heart pounds. Her small arm rotates impossibly behind her back, but she does not budge. It is as if her humanity were simply a pretence, now abandoned. It is if <i>the restrictions of physics</i> were merely a pretense. The others gather round you once more. Each of them places a hand on your body. You try to pull away, but there is nowhere to go. Constricted by the girl's grip, your arm starts to go numb. <br><br>You fight to free yourself, but you are weakening. It must be the exhaustion of trying to resist the impossible strength of the seven - but no, that's not it. There's something else. Your heart has slowed, and the tingling has spread to most of your body. You're struggling to keep your eyes open. The life is being sucked out of you. You need to act fast - you need a plan - but your mind is dimming, along with your body. You need to get out of here. You need to get out of here. You need - ")
+    elif dobj==villagers20:
+        game.addText("You hold out the opal for the others in the pub to see. Everyone turns to stare stares at it. All at once, their faces go slack. A young woman stands up from her table. She pauses for a moment, before leaping at you, and tackling you to the ground. The others look on, silently. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
+    elif dobj==villagers21:
+        game.addText("You hold out the opal for the villagers to see. Everyone turns to stare stares at it. All at once, their faces go slack. A young man takes a few steps toward you. He pauses for a moment, before leaping at you, and tackling you to the ground. The others look on, silently. He covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. His strength is incredible. You fight against him with everything you have, and scream, though his hand muffles you. He does not budge. He does not flinch. He does not blink. He does not blink at all. A shiver runs through your immobilized body as you look into his eyes, and see a depth, an emptiness that cannot be human. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
+    elif dobj in [vendor, picker, nurse25, daughter]:
+        game.addText("You hold out the opal. " + dobj.capNameArticle(True) + " stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
+    elif dobj in [children21, woman21, man21]:
+            return True
+    elif dobj == patients25:
+            game.addText("You hold out the opal for the patients to see. The nurse catches sight of it, and takes a few steps toward you. She stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. She covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of her body. Her strength is incredible. You fight against her with everything you have, and scream, though her hand muffles you. She does not budge. She does not flinch. She does not blink. She does not blink at all. A shiver runs through your immobilized body as you look into her eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
+    else:
+        game.addText("You hold out the opal. " + dobj.capNameArticle(True) + " stares at it, unmoving for a moment, before leaping at you, and tackling you to the ground. He covers your mouth with a hand, pressing you into the ground, restraining you more completely than should be possible with the weight of his body. His strength is incredible. You fight against him with everything you have, and scream, though his hand muffles you. He does not budge. He does not flinch. He does not blink. He does not blink at all. A shiver runs through your immobilized body as you look into his eyes, and see a depth, an emptiness that cannot be human. " + dobj.capNameArticle(True) + " is not the one looking out from behind those eyes. There's something else - something powerful - and it is looking directly at you. <br><br>Your body feels wrong. The strength is draining out of you. Under the weight of this other body - this avatar - you cannot move a muscle. You cannot resist. You are utterly helpless. The world swims before you. Your vision fades. You fade. ")
+    
+    opal_show_ending.endGame(game)
+    return False
 opal.giveVerbIobj = opalGiveShow
 opal.showVerbIobj = opalGiveShow
 opalbox.addThing(opal)
@@ -1338,10 +1350,10 @@ opalbox_key = Key()
 opalbox_key.setAdjectives(["silver"])
 opalbox_key.taken = False
 def opalboxKeyTake(game):
-	if not opalbox_key.taken:
-		arai.addSpecialTopic(arai_key_special)
-		opalbox_key.taken = True
-	return True
+    if not opalbox_key.taken:
+        arai.addSpecialTopic(arai_key_special)
+        opalbox_key.taken = True
+    return True
 opalbox_key.getVerbDobj = opalboxKeyTake
 opalbox_lock = Lock(True, opalbox_key)
 opalbox.setLock(opalbox_lock)
@@ -1367,7 +1379,7 @@ wand.xdescribeThing("A delicately carved dragon spirals round the wooden baton. 
 #shelf1.addThing(dullbook1)
 shelf1.addThing(opalbox_key)
 #def atticDiscover(game):
-	#arai.addSpecialTopic(arai_key_special)
+    #arai.addSpecialTopic(arai_key_special)
 #shack1.onDiscover = atticDiscover
 
 # SHORE 2
@@ -1398,29 +1410,29 @@ rocks2.xdescribeThing("Large rocks block the way to the west. ")
 rocks2.invItem = False
 rock_barriers.append(rocks2)
 def rocks2Break(game):
-	game.addText("The way west is now clear. ")
-	shore2.west = shore2w
+    game.addText("The way west is now clear. ")
+    shore2.west = shore2w
 rocks2.crushFunc = rocks2Break
 ocean2 = Container("ocean")
 ocean2.size = 500
 def setInOcean(game, dobj):
-	game.addText("You're not about to start dropping your possessions into the sea. ")
-	return False
+    game.addText("You're not about to start dropping your possessions into the sea. ")
+    return False
 ocean2.setInVerbIobj = setInOcean
 def dumpInOcean(game, dobj):
-	if isinstance(dobj, Liquid):
-		return True
-	elif isinstance(dobj, Container):
-		if dobj.containsLiquid():
-			return True
-	game.addText("You're not about to start dumping your possessions into the sea. ")
-	return False
+    if isinstance(dobj, Liquid):
+        return True
+    elif isinstance(dobj, Container):
+        if dobj.containsLiquid():
+            return True
+    game.addText("You're not about to start dumping your possessions into the sea. ")
+    return False
 def goInOcean(game):
-	if storm_turns_left==storm_turns_full:
-		game.addText("You won't be able to get far without a boat. ")
-	else:
-		game.addText("The ocean is very rough from the storm. You don't want to get any nearer to that water. ")
-		return False
+    if storm_turns_left==storm_turns_full:
+        game.addText("You won't be able to get far without a boat. ")
+    else:
+        game.addText("The ocean is very rough from the storm. You don't want to get any nearer to that water. ")
+        return False
 ocean2.climbInVerbDobj = goInOcean 
 ocean2.pourIntoVerbIobj = dumpInOcean
 ocean2.desc_reveal = False
@@ -1445,15 +1457,15 @@ seawater_taken.infinite_well = False
 seawater2.liquid_for_transfer = seawater_taken
 
 def mixSeaWater(game, base_liquid, mix_in):
-	container = base_liquid.getContainer()
-	if not container:
-		return False
-	if container.name=="ocean":
-		mix_in.location.removeThing(mix_in)
-		game.addText("You dump " + mix_in.lowNameArticle(True) + " into the ocean. ")
-		return True
-	else:
-		return False
+    container = base_liquid.getContainer()
+    if not container:
+        return False
+    if container.name=="ocean":
+        mix_in.location.removeThing(mix_in)
+        game.addText("You dump " + mix_in.lowNameArticle(True) + " into the ocean. ")
+        return True
+    else:
+        return False
 seawater2.mixWith = mixSeaWater
 ocean2.addThing(seawater2)
 shore2.floor.addSynonym("sand")
@@ -1502,12 +1514,12 @@ arai_journal._verbose_name = "leather bound notebook"
 arai_journal.describeThing("On the ground is a leather bound notebook. ")
 arai_journal.xdescribeThing("The leather bound notebook is worn. ")
 def araiJournalRead(game):
-	global arai_death_topics
-	game.addText(arai_journal.read_desc)
-	if not arai_death_topics:
-		arai_death_topics = True
-		arai.addSpecialTopic(arai_p2_journal1)
-		arai.addSpecialTopic(arai_p2_vellum2)
+    global arai_death_topics
+    game.addText(arai_journal.read_desc)
+    if not arai_death_topics:
+        arai_death_topics = True
+        arai.addSpecialTopic(arai_p2_journal1)
+        arai.addSpecialTopic(arai_p2_vellum2)
 arai_journal.readText = araiJournalRead
 s2wbox = Container("box")
 s2wbox.setAdjectives(["rough", "wooden"])
@@ -1535,16 +1547,16 @@ llwkey.setAdjectives(["tarnished", "brass"])
 llwkey.xdescribeThing("The key is made of tarnished brass. ")
 
 def shore2wReveal(game):
-	if s2wbox.location:
-		game.addText("Looking through the lens reveals nothing further. ")
-		return True
-	else:
-		game.addText("Looking through the lens reveals a rough wooden box at the base of the tree. ")
-		tree2w.addThing(s2wbox)
-		s2wbox.addThing(arai_journal)
-		#s2wbox.addThing(wand)
-		s2wbox.addThing(llwkey)
-		return True
+    if s2wbox.location:
+        game.addText("Looking through the lens reveals nothing further. ")
+        return True
+    else:
+        game.addText("Looking through the lens reveals a rough wooden box at the base of the tree. ")
+        tree2w.addThing(s2wbox)
+        s2wbox.addThing(arai_journal)
+        #s2wbox.addThing(wand)
+        s2wbox.addThing(llwkey)
+        return True
 shore2w.lensReveal = shore2wReveal
 
 # SHORE 3
@@ -1666,8 +1678,8 @@ myboat.broken = True
 shore6.addThing(myboat)
 myboat.addThing(lightcrystal)
 def getinboat(game):
-	game.addText("There's no use in getting in the boat right now. It's not as if you can sail it in its current state. ")
-	return False
+    game.addText("There's no use in getting in the boat right now. It's not as if you can sail it in its current state. ")
+    return False
 myboat.climbInVerbDobj = getinboat
 
 boat_sail.setAdjectives(["torn", "boat"])
@@ -1685,10 +1697,10 @@ myboat.addComposite(boat_mast)
 power_slot = Container("socket")
 power_slot.setAdjectives(["power", "crystal"])
 def crystalSlotDesc():
-	if boat_power.ix in power_slot.contains:
-		return "In the boat's crystal socket, the power crystal is badly cracked. "
-	else:
-		return "The boat's crystal socket is empty. "
+    if boat_power.ix in power_slot.contains:
+        return "In the boat's crystal socket, the power crystal is badly cracked. "
+    else:
+        return "The boat's crystal socket is empty. "
 
 boat_power.setAdjectives(["broken", "cracked", "power"])
 boat_power.addSynonym("power")
@@ -1696,18 +1708,18 @@ boat_power._verbose_name = "cracked power crystal"
 boat_power.describeThing("")
 boat_power.xdescribeThing("The power crystal is badly cracked. There's no chance you'll be able to use it in its current state. ")
 def putInSlotFunc(game, dobj):
-	if dobj==boat_power:
-		game.addText("You fit the power crystal back into its slot. ")
-		#me.contains[dobj.ix].remove(dobj)
-		me.removeThing(dobj)
-		power_slot.addThing(boat_power)
-		return False
-	elif dobj==lightcrystal:
-		game.addText("While the light crystal is made of the same material as a power crystal, the enchantment is different, making the energy output much lower. Unfortunately it won't work well as a power source. ")
-		return False
-	else:
-		game.addText("Trying to fit " + dobj.getArticle(True) + dobj.verbose_name + " inside might damage the socket's conductive coating. ")
-		return False
+    if dobj==boat_power:
+        game.addText("You fit the power crystal back into its slot. ")
+        #me.contains[dobj.ix].remove(dobj)
+        me.removeThing(dobj)
+        power_slot.addThing(boat_power)
+        return False
+    elif dobj==lightcrystal:
+        game.addText("While the light crystal is made of the same material as a power crystal, the enchantment is different, making the energy output much lower. Unfortunately it won't work well as a power source. ")
+        return False
+    else:
+        game.addText("Trying to fit " + dobj.getArticle(True) + dobj.verbose_name + " inside might damage the socket's conductive coating. ")
+        return False
 power_slot.setInVerbIobj = putInSlotFunc
 power_slot.describeThing(f"{crystalSlotDesc()}")
 power_slot.xdescribeThing(f"{crystalSlotDesc()}")
@@ -1735,9 +1747,9 @@ forest7.addThing(forestThing7)
 # SHORE 8 (WRECK SITE 2)
 shore8 = OutdoorRoom("Shore, Site of a Half-Buried Wreck", "There is a short patch of sand along the shore. ")
 def shore8Arrive(game):
-	##hints.setNode(shovelHintNode)
-	#hints.closeNode(findWreckHintNode)
-	pass
+    ##hints.setNode(shovelHintNode)
+    #hints.closeNode(findWreckHintNode)
+    pass
 shore8.arriveFunc = shore8Arrive
 shore8.ceiling.xdescribeThing(f"{skyState()}")
 shore8.east = forest7
@@ -1818,9 +1830,9 @@ smallCaveConnector.entranceB_msg = "You crawl out of the cave."
 smallCaveConnector.entranceB.describeThing("Light trickles in through a hole to the west.")
 smallCaveConnector.entranceB.xdescribeThing("The hole looks large enough for you to pass through. ")
 for item in smallCave10.walls:
-	item.xdescribeThing("The cave wall is rough stone. ")
-	item.setAdjectives(item.adjectives + ["cave"])
-	item.describeThing("")
+    item.xdescribeThing("The cave wall is rough stone. ")
+    item.setAdjectives(item.adjectives + ["cave"])
+    item.describeThing("")
 forest9.entrance = smallCaveConnector
 smallCave10.exit = smallCaveConnector
 copper1 = Thing("coin")
@@ -1831,14 +1843,14 @@ copper1.describeThing("On the ground is a copper coin. ")
 copper1.xdescribeThing("The coin is small, and made of copper. ")
 
 def copper1Take(game):
-	if copper1.ix in me.contains or copper1.ix in me.sub_contains:
-		##hints.setNode(sewSailHintNode)
-		#hints.closeNode(findCopperHintNode)
-		pass
-	return True
+    if copper1.ix in me.contains or copper1.ix in me.sub_contains:
+        ##hints.setNode(sewSailHintNode)
+        #hints.closeNode(findCopperHintNode)
+        pass
+    return True
 
 copper1.getVerbDobj = copper1Take
-	
+    
 
 smallCave10.addThing(copper1)
 
@@ -1951,16 +1963,16 @@ cave_entrance14.invItem = False
 temple14.addThing(cave_entrance14)
 
 def mainCavesEnter(game):
-	from intficpy.travel import travelN
-	travelN(game)
+    from intficpy.travel import travelN
+    travelN(game)
 cave_entrance14.climbInVerbDobj = mainCavesEnter
 
 def viewDragon():
-	pass
-	#hints.closeNode(dragonHintNode)
-	#if pillarsHintNode.complete:
-		#hints.closeNode(ruinHintNode)
-		
+    pass
+    #hints.closeNode(dragonHintNode)
+    #if pillarsHintNode.complete:
+        #hints.closeNode(ruinHintNode)
+        
 
 temple14.floor.xdescribeThing(f"Grass springs up between the stones of the floor. In the pattern of the tiles, you can see the image of a silver dragon, flying through a red sky. Starting from the tail in the northwest, it circles clockwise round the ruin. {viewDragon()}")
 templeThing14 = Thing("ruin")
@@ -1977,30 +1989,30 @@ temple14.addThing(forestThing14)
 monoliths14 = []
 m14adj = ["northwest", "northeast", "southeast", "southwest"]
 for adj in m14adj:
-	monolith = Thing("monolith")
-	monolith.addSynonym("stone")
-	monolith.addSynonym("stones")
-	monolith.addSynonym("monoliths")
-	monolith.setAdjectives(["great", "stone", adj])
-	monolith._verbose_name = adj + " monolith"
-	monolith.describeThing("")
-	monolith.xdescribeThing("The monolith is tall. ") # REPLACE THIS FOR PUZZLE
-	monolith.invItem = False
-	monolith.cannotTakeMsg = "The monolith is taller than you are, and made of solid stone. You can't possibly move it. "
-	monoliths14.append(monolith)
-	temple14.addThing(monolith)
+    monolith = Thing("monolith")
+    monolith.addSynonym("stone")
+    monolith.addSynonym("stones")
+    monolith.addSynonym("monoliths")
+    monolith.setAdjectives(["great", "stone", adj])
+    monolith._verbose_name = adj + " monolith"
+    monolith.describeThing("")
+    monolith.xdescribeThing("The monolith is tall. ") # REPLACE THIS FOR PUZZLE
+    monolith.invItem = False
+    monolith.cannotTakeMsg = "The monolith is taller than you are, and made of solid stone. You can't possibly move it. "
+    monoliths14.append(monolith)
+    temple14.addThing(monolith)
 
 xmonoliths = []
 def viewMonolith(n):
-	global xmonoliths
-	if n not in xmonoliths:
-		pass
-		#xmonoliths.append(n)
-		#hints.setNode(pillarsHintNode)
-		#if len(xmonoliths) == 4:
-			#hints.closeNode(pillarsHintNode)
-			#if dragonHintNode.complete:
-				#hints.closeNode(ruinHintNode)
+    global xmonoliths
+    if n not in xmonoliths:
+        pass
+        #xmonoliths.append(n)
+        #hints.setNode(pillarsHintNode)
+        #if len(xmonoliths) == 4:
+            #hints.closeNode(pillarsHintNode)
+            #if dragonHintNode.complete:
+                #hints.closeNode(ruinHintNode)
 
 monoliths14[0].describeThing("At each of the four corners of the ruin stands a great stone monolith. ")
 monoliths14[0].xdescribeThing(f"Carved into the northwest monolith is a triangle of 3 dots. {viewMonolith(0)}")
@@ -2045,12 +2057,12 @@ forest15.addThing(mountainThing15)
 mountainThing15.addSynonym("slope")
 mountainThing15._verbose_name = "mountain"
 def slope15upfunc(game):
-	game.addText("The slope to the east is too steep to ascend safely. ")
-	return False
+    game.addText("The slope to the east is too steep to ascend safely. ")
+    return False
 def slope15downfunc(game):
-	import intficpy.travel as travel
-	travel.travelW(game)
-	return False
+    import intficpy.travel as travel
+    travel.travelW(game)
+    return False
 mountainThing15.climbOnVerbDobj = slope15upfunc
 mountainThing15.climbDownFromVerbDobj = slope15downfunc
 
@@ -2155,12 +2167,12 @@ daughter.xdescribeThing(f"{daughter.capNameArticle(True)} is tall, with short bl
 daughter_father = SpecialTopic("ask if she's the boatmaker's daughter", f"{daughter.capNameArticle(True)} looks at you directly for the first time. \"My father,\" she says, a look of instense concentration on her face. \"He'll be missing me. I must get back to him.\" She pauses, blinking a few times, as if to clear her eyes. \"You aren't lost, are you? Somehow, you've managed to stray from the path without losing your way . . . . What a strange power  . . . you have.\" She trails off. After a long silence, she takes a deep breath, and looks you directly in the eye. \"Lead me,\" she says. \"Lead me home. Please.\" ")
 daughter_father.addAlternatePhrasing("ask if are you is she the boatmakers boat makers daughter")
 def daughterFather(app, suggest=True):
-	game.addText(daughter_father.text)
-	daughter.removeSpecialTopic(daughter_father)
-	boatmaker.addSpecialTopic(boatmaker_daughter2_special)
-	daughter.can_be_led = True
-	daughter.default_topic = daughter_default2
-	daughter.makeProper("Tani the Boatmaker's Daughter")
+    game.addText(daughter_father.text)
+    daughter.removeSpecialTopic(daughter_father)
+    boatmaker.addSpecialTopic(boatmaker_daughter2_special)
+    daughter.can_be_led = True
+    daughter.default_topic = daughter_default2
+    daughter.makeProper("Tani the Boatmaker's Daughter")
 daughter_father.func = daughterFather
 daughter.default_topic = f"{daughter.capNameArticle(True)} doesn't seem to hear, or even see you. \"I've strayed from the path,\" she mutters. \"I am lost. I am forever lost. Oh, Goddess, let me die swiftly.\""
 shore17.addThing(daughter)
@@ -2172,8 +2184,8 @@ daughter_composites[1]._verbose_name = "the young woman's dress"
 daughter_composites[0].xdescribeThing(f"{daughter.capNameArticle(True)} 's hair is short and black. ")
 daughter_composites[1].xdescribeThing(f"{daughter.capNameArticle(True)} 's dress is pale green. ")
 for item in daughter_composites:
-	item.describeThing("")
-	daughter.addComposite(item)
+    item.describeThing("")
+    daughter.addComposite(item)
 daughter_composites[0].cannotTakeMsg = "You can't take someone's hair! "
 daughter_composites[1].cannotTakeMsg = "You can't take someone's clothing! "
 
@@ -2183,21 +2195,21 @@ daughter_default3 = f"\"Thank you for your help,\" says {daughter.lowNameArticle
 boatmaker_default2 = f"\"Thank you for rescuing my daughter,\" says the boatmaker. \"If there's anything else I can do for you, please let me know.\" "
 boatmaker_board_special = SpecialTopic("ask for a wooden plank to make a bridge", f"\"Sure, I can give you a plank of wood,\" says the boatmaker. \"Just gimme a second.\" He disappears behind the ship for a moment, and returns with a wooden board on his shoulder. \"Here you are, then.\"")
 def boatmakerBoard(app, suggest=True):
-	game.addText(boatmaker_board_special.text)
-	me.addThing(woodboard)
-	game.addText("(Received: " + woodboard.verbose_name + ")")
-	boatmaker.removeSpecialTopic(boatmaker_board_special)
+    game.addText(boatmaker_board_special.text)
+    me.addThing(woodboard)
+    game.addText("(Received: " + woodboard.verbose_name + ")")
+    boatmaker.removeSpecialTopic(boatmaker_board_special)
 boatmaker_board_special.func = boatmakerBoard
 
 def boatmakerDefault2(app, suggest=True):
-	game.addText(boatmaker_default2)
-	if suggest:
-		boatmaker.printSuggestions(game)
+    game.addText(boatmaker_default2)
+    if suggest:
+        boatmaker.printSuggestions(game)
 
 def daughterLead(game, iobj):
-	from intficpy.verb import leadDirVerb
-	leadDirVerb.verbFunc(game, daughter, iobj, True)
-	return False
+    from intficpy.verb import leadDirVerb
+    leadDirVerb.verbFunc(game, daughter, iobj, True)
+    return False
 
 daughter.leadDirVerbDobj = daughterLead
 
@@ -2247,8 +2259,8 @@ townThing18.invItem = False
 townThing18.describeThing("")
 townThing18.xdescribeThing("The village is small, with buildings of wood and stone. ")
 def go_in_town(game):
-	import intficpy.travel as travel
-	travel.travelSE(game)
+    import intficpy.travel as travel
+    travel.travelSE(game)
 townThing18.climbInVerbDobj = go_in_town
 road18.addThing(townThing18)
 
@@ -2324,9 +2336,9 @@ vendor.xdescribeThing("The vendor is a stout, middle-aged woman with curly hair.
 market19.addThing(vendor)
 vendor_notions = Topic(f"\"I'll sell you a needle and thread for two copper,\" says the vendor. ")
 def vendorNotions(app, suggest=True):
-	game.addText(vendor_notions.text)
-	if suggest:
-		vendor.printSuggestions(game)
+    game.addText(vendor_notions.text)
+    if suggest:
+        vendor.printSuggestions(game)
 vendor_notions.func = vendorNotions
 vendor.addTopic("asktell", vendor_notions, needlethread)
 vendor_fabrics = Topic("The vendor smiles. \"Hmm,\" she says. \"Well, personally, I'm partial to this red taffeta. Oh, but the pale green crepe is lovely, too! You can't go wrong, really.\" ")
@@ -2336,19 +2348,19 @@ vendor_sail = Topic(f"\"A torn sail, you say?\" says the vendor. \"Well, I can s
 vendor.addTopic("asktell", vendor_sail, boat_sail)
 vendor_sail_special = SpecialTopic("tell the vendor about your torn sail", vendor_sail.text)
 def vendorSail(app, suggest=True):
-	#hints.closeNode(talkVendorHintNode)
-	game.addText(vendor_sail_special.text)
-	if suggest:
-		vendor.printSuggestions(game)
+    #hints.closeNode(talkVendorHintNode)
+    game.addText(vendor_sail_special.text)
+    if suggest:
+        vendor.printSuggestions(game)
 vendor_sail.func = vendorSail
 vendor_sail_special.func = vendorSail
 vendor_sail_special.addAlternatePhrasing("tell her him vendor about my your torn sail")
 vendor_hull = Topic(f"\"You should talk to Sem, in the shipyard,\" says the vendor. \"He's our master boatmaker. He'd know what to do.\" ")
 def vendorHull(app, suggest=True):
-	game.addText(vendor_hull.text)
-	boatmaker.makeProper("Sem the Boatmaker")
-	vendor.printSuggestions(game)
-	#hints.setNode(talkBoatmakerHintNode)
+    game.addText(vendor_hull.text)
+    boatmaker.makeProper("Sem the Boatmaker")
+    vendor.printSuggestions(game)
+    #hints.setNode(talkBoatmakerHintNode)
 vendor.addTopic("asktell", vendor_hull, myboat)
 vendor_hull_special = SpecialTopic("tell the vendor about your the hole in your hull", vendor_hull.text)
 vendor_hull.func = vendorHull
@@ -2359,16 +2371,16 @@ vendor.addTopic("asktellgiveshow", vendor_crystal, boat_power)
 vendor_crystal_special = SpecialTopic("tell the vendor about your broken power crystal", vendor_crystal.text)
 vendor_crystal_special.addAlternatePhrasing("tell her him vendor about my your broken boat power crystal source")
 def vendorCrystal(app, suggest=True):
-	blessed22.addSpecialTopic(blessed_crystal_special)
-	game.addText(vendor_crystal.text)
-	vendor.printSuggestions(game)
+    blessed22.addSpecialTopic(blessed_crystal_special)
+    game.addText(vendor_crystal.text)
+    vendor.printSuggestions(game)
 vendor_crystal.func = vendorCrystal
 vendor_crystal_special.func = vendorCrystal
 vendor_compass = Topic(f"\"Your compass went missing from your boat?\" says the vendor. \"I wonder if Ket picked it up. She collects parts from shipwrecks. She might not have realized the boat's owner was still alive. You should go talk to her in the scrapyard. I'm sure she'd be happy to give it back, if she has it.\" ")
 def vendorCompass(app, suggest=True):
-	game.addText(vendor_compass.text)
-	vendor.printSuggestions(game)
-	#hints.setNode(talkPickerHintNode)
+    game.addText(vendor_compass.text)
+    vendor.printSuggestions(game)
+    #hints.setNode(talkPickerHintNode)
 vendor.addTopic("asktell", vendor_compass, mycompass)
 vendor_compass_special = SpecialTopic("tell the vendor about your missing compass", vendor_compass.text)
 vendor_compass_special.addAlternatePhrasing("tell her him vendor about my your missing compass")
@@ -2377,8 +2389,8 @@ vendor_compass_special.func = vendorCompass
 vendor.addSelling(needlethread, copper1, 2, 1)
 vendor.for_sale[needlethread.ix].out_stock_msg = "You don't need another needle and thread. "
 def needleAfterBuy(game):
-	#hints.closeNode(buyNeedleHintNode)
-	pass
+    #hints.closeNode(buyNeedleHintNode)
+    pass
 vendor.for_sale[needlethread.ix].afterBuy = needleAfterBuy
 #vendor.addWillBuy(needlethread, copper1, 2, 1)
 vendor.addSelling(pickaxe, goldingot, 1, 1)
@@ -2400,8 +2412,8 @@ buildingThing19.describeThing("")
 buildingThing19.xdescribeThing("The building is small, and wooden. ")
 market19.addThing(buildingThing19)
 def go_in_building19(game):
-	import intficpy.travel as travel
-	travel.travelS(game)
+    import intficpy.travel as travel
+    travel.travelS(game)
 buildingThing19.climbInVerbDobj = go_in_building19
 #market19.addThing(lens)
 # PUB 20
@@ -2419,8 +2431,8 @@ tables20.describeThing("")
 tables20.xdescribeThing("The pub tables are old, and made of dark wood. ")
 pub20.addThing(tables20)
 def pub_tables_set(game, dobj):
-	game.addText("A villager glares at you warningly, and you withdraw your hand. ")
-	return False
+    game.addText("A villager glares at you warningly, and you withdraw your hand. ")
+    return False
 tables20.setOnVerbIobj = pub_tables_set
 villagers20 = Actor("villagers")
 villagers20.addSynonym("people")
@@ -2433,12 +2445,12 @@ pub20.addThing(villagers20)
 villagers20.default_topic = "A few of the more alert villagers look up at you. You get a smile or two, and a few sleepy nods, but no one speaks. "
 kaur_offering_topic = SpecialTopic("ask for Kaur to make an offering", "Ket the Picker's face lights up. \"Of course!\" she says. \"Here!\" She hands you a cup of Kaur. ")
 def kaurOfferingTopic(app, suggest=True):
-	game.addText(kaur_offering_topic.text)
-	me.addThing(kaur_cup)
-	kaur_cup.addThing(kaur_liquid)
-	game.addText("(Received: white ceramic cup containing Kaur)")
-	picker.removeSpecialTopic(kaur_offering_topic)
-	#villagers20.removeSpecialTopic(kaur_offering_topic)
+    game.addText(kaur_offering_topic.text)
+    me.addThing(kaur_cup)
+    kaur_cup.addThing(kaur_liquid)
+    game.addText("(Received: white ceramic cup containing Kaur)")
+    picker.removeSpecialTopic(kaur_offering_topic)
+    #villagers20.removeSpecialTopic(kaur_offering_topic)
 kaur_offering_topic.func = kaurOfferingTopic
 drink20 = Thing("beverage")
 drink20.addSynonym("drink")
@@ -2478,8 +2490,8 @@ hallThing21.describeThing("")
 hallThing21.xdescribeThing("The hall is ornately built, with decorative swirls carved into the wood of its facade, and bright stained glass windows. ")
 square21.addThing(hallThing21)
 def go_in_hall21(game):
-	import intficpy.travel as travel
-	travel.travelN(game)
+    import intficpy.travel as travel
+    travel.travelN(game)
 hallThing21.climbInVerbDobj = go_in_hall21
 towerThing21 = Thing("watchtower")
 towerThing21.addSynonym("building")
@@ -2491,15 +2503,15 @@ towerThing21.describeThing("")
 towerThing21.xdescribeThing("The tower, constructed from large slabs of stone, looks like a fortess compared to the wooden buildings surrounding it. At the top, you can see the silhouette of someone standing beneath a raised roof. ")
 square21.addThing(towerThing21)
 def go_in_tower(game):
-	import intficpy.travel as travel
-	travel.travelS(game)
+    import intficpy.travel as travel
+    travel.travelS(game)
 towerThing21.climbInVerbDobj = go_in_tower
 villagers21 = Actor("villagers")
 villagers21.addSynonym("people")
 villagers21.invItem = False
 def squareVillagersFunc():
-	desc = ["A group of villagers are passing through. They stop to gawk at you for a moment before continuing on their way. ", "Three villagers stand in the corner of the square, chatting idly. Another few walk past, headed east. ", "Four children chase each other through the square, laughing. They stop when they catch sight of you, and, noticing that you are looking at them, hurry away. ", "A young man pushes a barrow of fruits through the square, toward the market, whistling as he walks. ", "A woman with a baby walks past. A child runs to catch up with her. She takes his hand as they pass out of the square. "]
-	return random.choice(desc)
+    desc = ["A group of villagers are passing through. They stop to gawk at you for a moment before continuing on their way. ", "Three villagers stand in the corner of the square, chatting idly. Another few walk past, headed east. ", "Four children chase each other through the square, laughing. They stop when they catch sight of you, and, noticing that you are looking at them, hurry away. ", "A young man pushes a barrow of fruits through the square, toward the market, whistling as he walks. ", "A woman with a baby walks past. A child runs to catch up with her. She takes his hand as they pass out of the square. "]
+    return random.choice(desc)
 villagers21.describeThing(f"{squareVillagersFunc()}")
 villagers21.xdescribeThing(f"{squareVillagersFunc()}")
 villagers21.storm_desc = "The once busy square is abandoned. "
@@ -2592,8 +2604,8 @@ desk23.describeThing("")
 desk23.xdescribeThing("The desk, made of rough wood, is heaped with papers. ")
 tower23.addThing(desk23)
 def tower_desk_set(game, dobj):
-	game.addText(f"\"Hey!\" the guard snaps. \"This is my office, not yours.\"<br> You withdraw your hand. ")
-	return False
+    game.addText(f"\"Hey!\" the guard snaps. \"This is my office, not yours.\"<br> You withdraw your hand. ")
+    return False
 desk23.setOnVerbIobj = tower_desk_set
 torches23 = Thing("torches")
 torches23.invItem = False
@@ -2644,8 +2656,8 @@ shipyardThing24.describeThing("To the east is a shipyard. ")
 shipyardThing24.xdescribeThing("To the east is a shipyard. ")
 road24.addThing(shipyardThing24)
 def go_in_shipyard(game):
-	import intficpy.travel as travel
-	travel.travelE(game)
+    import intficpy.travel as travel
+    travel.travelE(game)
 shipyardThing24.climbInVerbDobj = go_in_shipyard
 hallThing24 = Thing("hall")
 hallThing24.addSynonym("building")
@@ -2655,8 +2667,8 @@ hallThing24.describeThing("To the south is a hall, smaller and less decorated th
 hallThing24.xdescribeThing("To the south is a hall, smaller and less decorated than the one in Town Square, but still well maintained. ")
 road24.addThing(hallThing24)
 def go_in_hall24(game):
-	import intficpy.travel as travel
-	travel.travelS(game)
+    import intficpy.travel as travel
+    travel.travelS(game)
 hallThing24.climbInVerbDobj = go_in_hall24
 
 # HALL 25 (Hall of Endings)
@@ -2708,23 +2720,23 @@ nurse25.storm_hermit_topic = nurse_hermit
 yard26 = OutdoorRoom("Shipyard", "A path leads through the shipyard, from town to the west, to the harbour to the northeast. ")
 tani_arrive_cut = False
 def yard26Arrive(game):
-	global tani_arrive_cut
-	if daughter.location==yard26 and not tani_arrive_cut:
-		daughter.can_lead = False
-		daughter.default_topic = daughter_default3
-		boatmaker.defaultTopic = boatmakerDefault2
-		boatmaker.removeAllSpecialTopics()
-		boatmaker.removeAllTopics()
-		daughter.removeAllSpecialTopics()
-		daughter.removeAllTopics()
-		boatmaker.describeThing("The boatmaker sits by the fence, reading a schematic. His daughter Tani leans on his shoulder. ")
-		daughter.describeThing("")
-		#yard26.removeThing(boatmaker)
-		#yard26.removeThing(daughter)
-		game.addText(f"{boatmaker.capNameArticle(True)} runs out to meet you as you enter the shipyard. His daughter throws herself into his arms. <br> \"Tani!\" he cries. \"You've come back to me!\" <br> \"The Outsider helped me find my way,\" Tani says. \"I'd lost the path. I slipped on some loose rocks as I was walking through the mountains.\"<br> \"Lost the path!\" the boatmaker cries. \"What a cruel fate! Thank the Goddess you were found. The Outsider must have the same ability as Arai - to navigate even when off the path. How strange.\" He turns to you. \"Thank you for rescuing my daughter, Noble Outsider. I heard your boat was damaged by the Storm. Please, take this. It's the least I can do.\"")
-		game.addText("(Received: patch kit)")
-		me.addThing(patchkit)
-		tani_arrive_cut = True
+    global tani_arrive_cut
+    if daughter.location==yard26 and not tani_arrive_cut:
+        daughter.can_lead = False
+        daughter.default_topic = daughter_default3
+        boatmaker.defaultTopic = boatmakerDefault2
+        boatmaker.removeAllSpecialTopics()
+        boatmaker.removeAllTopics()
+        daughter.removeAllSpecialTopics()
+        daughter.removeAllTopics()
+        boatmaker.describeThing("The boatmaker sits by the fence, reading a schematic. His daughter Tani leans on his shoulder. ")
+        daughter.describeThing("")
+        #yard26.removeThing(boatmaker)
+        #yard26.removeThing(daughter)
+        game.addText(f"{boatmaker.capNameArticle(True)} runs out to meet you as you enter the shipyard. His daughter throws herself into his arms. <br> \"Tani!\" he cries. \"You've come back to me!\" <br> \"The Outsider helped me find my way,\" Tani says. \"I'd lost the path. I slipped on some loose rocks as I was walking through the mountains.\"<br> \"Lost the path!\" the boatmaker cries. \"What a cruel fate! Thank the Goddess you were found. The Outsider must have the same ability as Arai - to navigate even when off the path. How strange.\" He turns to you. \"Thank you for rescuing my daughter, Noble Outsider. I heard your boat was damaged by the Storm. Please, take this. It's the least I can do.\"")
+        game.addText("(Received: patch kit)")
+        me.addThing(patchkit)
+        tani_arrive_cut = True
 yard26.arriveFunc = yard26Arrive
 yard26.ceiling.xdescribeThing(f"{skyState()}")
 yard26.west = road24
@@ -2758,19 +2770,19 @@ boatmaker.storm_hermit_state = Topic(f"\"The boatmaker gets an abstracted look o
 daughter.storm_hermit_state = Topic(f"\"Papa,\" she says, between sobs. \"Papa, please.\" You're not sure she can hear you. ")
 boatmaker.xdescribeThing(f"{boatmaker.capNameArticle(True)} is tall and strong, with greying black hair. His face has the beginnings of wrinkles. ")
 def lostDaughterDefault(app, suggest=True):
-	game.addText(f"\"Sorry,\" says {boatmaker.lowNameArticle(True)} . \"I'm a little distracted. My daughter is missing.\"")
-	boatmaker.addSpecialTopic(boatmaker_daughter_special)
-	boatmaker.printSuggestions(game)
+    game.addText(f"\"Sorry,\" says {boatmaker.lowNameArticle(True)} . \"I'm a little distracted. My daughter is missing.\"")
+    boatmaker.addSpecialTopic(boatmaker_daughter_special)
+    boatmaker.printSuggestions(game)
 boatmaker.defaultTopic = lostDaughterDefault
 boatmaker_daughter = Topic(f"\"My daughter didn't come home last night,\" says {boatmaker.lowNameArticle(True)} . \"She was walking in the woods. I'm terrified something's happened to her. Her name is Tani. She's seventeen years old and tall, with short black hair. Yesterday, she was wearing a light green dress. Please, if you see her, bring her home.\"")
 def boatmakerDaughter(app, suggest=True):
-	game.addText(boatmaker_daughter.text)
-	##hints.setNode(findDaughterHintNode)
-	#hints.closeNode(talkBoatmakerHintNode)
-	daughter.addSpecialTopic(daughter_father)
-	if daughter.ix in me.knows_about:
-		boatmaker.addSpecialTopic(boatmaker_daughter2_special)
-	boatmaker.printSuggestions(game)
+    game.addText(boatmaker_daughter.text)
+    ##hints.setNode(findDaughterHintNode)
+    #hints.closeNode(talkBoatmakerHintNode)
+    daughter.addSpecialTopic(daughter_father)
+    if daughter.ix in me.knows_about:
+        boatmaker.addSpecialTopic(boatmaker_daughter2_special)
+    boatmaker.printSuggestions(game)
 boatmaker_daughter_special = SpecialTopic("ask about his missing daughter", boatmaker_daughter.text)
 boatmaker_daughter_special.func = boatmakerDaughter
 boatmaker_daughter2_special = SpecialTopic("tell him you've found his daughter", f"\"What?\" {boatmaker.lowNameArticle(True)} cries in horror. \"She's off the path? And you came back without her? Please, Outsider, don't be so cruel. You appear to have the power to move without Her guidance, but we do not. Tani will die out there if you don't go back for her. I'll reward you! I'll be forever in your debt! Just bring my daughter home.\"")
@@ -2811,8 +2823,8 @@ forestThing27._verbose_name = "forest path"
 forestThing27.xdescribeThing("A wide path leads north through the trees. ")
 forestThing27.describeThing("")
 def go_in_forest27(game):
-	import intficpy.travel as travel
-	travel.travelN(game)
+    import intficpy.travel as travel
+    travel.travelN(game)
 forestThing27.climbInVerbDobj = go_in_forest27
 road27.addThing(forestThing27)
 road27.removeThing(road27.floor)
@@ -2828,8 +2840,8 @@ scrapyardThing27.describeThing("Just northeast of the path is the entrance to a 
 scrapyardThing27.xdescribeThing("Just northeast of the path is the entrance to a scrapyard ")
 road27.addThing(scrapyardThing27)
 def go_in_scrapyard(game):
-	import intficpy.travel as travel
-	travel.travelNE(game)
+    import intficpy.travel as travel
+    travel.travelNE(game)
 scrapyardThing27.climbInVerbDobj = go_in_scrapyard
 
 # YARD 28 (Scrapyard)
@@ -2868,21 +2880,21 @@ picker.xdescribeThing("The young woman wears rough leather gloves. Short-cropped
 picker.tavern_bound = False
 picker_hi1 = Topic(f"\"Hello,\" says {picker.lowNameArticle(True)} . \"You must be the outsider Arai saved. She really went out on a limb for you - turning her magic against the Storm, and sheltering you in her own home. It's surprising really, considering how little she does for her <i>own</i> community. I'm Ket, by the way. I own the scrapyard here. I salvage parts from the ships that crash on our shores. It's good to meet you.\" ")
 def pickerHiFunc1(app, suggest=True):
-	game.addText(picker_hi1.text)
-	if suggest:
-		picker.printSuggestions(game)
-	picker.makeProper("Ket the Picker")
-	if not arai.has_proper_name:
-		arai.makeProper("Arai, the woman from the shack")
-		arai.removeSynonym("shack")
+    game.addText(picker_hi1.text)
+    if suggest:
+        picker.printSuggestions(game)
+    picker.makeProper("Ket the Picker")
+    if not arai.has_proper_name:
+        arai.makeProper("Arai, the woman from the shack")
+        arai.removeSynonym("shack")
 picker_hi1.func = pickerHiFunc1
 picker_hi1.owner = picker
 picker_hi2 = Topic(f"\"Hello again,\" says {picker.lowNameArticle(True)} . \"What can I do for you?\" ")
 picker.setHiTopics(picker_hi1, picker_hi2)
 def pickerDefault(app, suggest=True):
-	game.addText(f"{picker.capNameArticle(True)} looks at you in confusion. ")
-	if suggest:
-		picker.printSuggestions(game)
+    game.addText(f"{picker.capNameArticle(True)} looks at you in confusion. ")
+    if suggest:
+        picker.printSuggestions(game)
 picker.defaultTopic = pickerDefault
 scrap_topic = Topic(f"{picker.capNameArticle(True)} smiles proudly. \"I gathered all this myself, from ships that have crashed on our shores. Impressive, isn't it?\" ")
 picker.addTopic("asktell", scrap_topic, scrap28)
@@ -2892,21 +2904,21 @@ picker_compass = Topic(f"\"Yes, I took it,\" says {picker.lowNameArticle(True)} 
 picker.addTopic("asktell", picker_compass, mycompass)
 picker_hermit1 = Topic(f"\"I'll meet you at the tavern,\" says {picker.lowNameArticle(True)} . \"I just gotta finish up here.\" ")
 def pickerCompass(game):
-	game.addText(picker_compass.text)
-	picker.tavern_bound = True
-	removeCompassTopics()
-	arai.location.removeThing(arai)
-	market19.addThing(arai)
-	picker.setHermitTopic(picker_hermit1)
-	arai.setHermitTopic(arai_warning2)
-	goddess_abs.makeKnown(me)
-	goddess_abs.level = 1
-	##hints.setNode(meetKetHintNode)
-	#hints.closeNode(talkPickerHintNode)
-	if storm_abs.known_ix in me.knows_about:
-		me.knows_about.remove(storm_abs.known_ix)
-	arai.describeThing(f"{arai.capNameArticle(False)} stands in the south of the square, near the entrance to the wooden building. She watches you as you move through the market. ")
-	market19.descFunc = araiWarning1
+    game.addText(picker_compass.text)
+    picker.tavern_bound = True
+    removeCompassTopics()
+    arai.location.removeThing(arai)
+    market19.addThing(arai)
+    picker.setHermitTopic(picker_hermit1)
+    arai.setHermitTopic(arai_warning2)
+    goddess_abs.makeKnown(me)
+    goddess_abs.level = 1
+    ##hints.setNode(meetKetHintNode)
+    #hints.closeNode(talkPickerHintNode)
+    if storm_abs.known_ix in me.knows_about:
+        me.knows_about.remove(storm_abs.known_ix)
+    arai.describeThing(f"{arai.capNameArticle(False)} stands in the south of the square, near the entrance to the wooden building. She watches you as you move through the market. ")
+    market19.descFunc = araiWarning1
 picker_compass.func = pickerCompass
 picker_compass_special = SpecialTopic("ask if she's seen your compass", picker_compass.text)
 picker_compass_special.addAlternatePhrasing("ask her picker if she's seen my your compass")
@@ -2917,10 +2929,10 @@ picker.addTopic("asktell", picker_sail, boat_sail)
 picker_sail_special = SpecialTopic("ask about repairing torn sails", picker_sail.text)
 picker_sail_special.addAlternatePhrasing("ask her picker about repairing my your torn sail")
 def pickerSail(app, suggest=True):
-	#hints.setNode(talkVendorHintNode)
-	game.addText(picker_sail_special.text)
-	if suggest:
-		picker.printSuggestions(game)
+    #hints.setNode(talkVendorHintNode)
+    game.addText(picker_sail_special.text)
+    if suggest:
+        picker.printSuggestions(game)
 picker_sail.func = pickerSail
 picker_sail_special.func = pickerSail
 picker_hull = Topic(f"\"The hull didn't seem beyond repair when I saw it this morning. Just patch it,\" says {picker.lowNameArticle(True)} . \"That being said, you should consider staying here.\" ")
@@ -2928,10 +2940,10 @@ picker.addTopic("asktell", picker_hull, myboat)
 picker_hull_special = SpecialTopic("ask about patching holes in boats", picker_hull.text)
 picker_hull_special.addAlternatePhrasing("ask her picker about patching repairing fixing my your boat hull")
 def pickerHull(app, suggest=True):
-	#hints.setNode(talkBoatmakerHintNode)
-	game.addText(picker_hull_special.text)
-	if suggest:
-		picker.printSuggestions(game)
+    #hints.setNode(talkBoatmakerHintNode)
+    game.addText(picker_hull_special.text)
+    if suggest:
+        picker.printSuggestions(game)
 picker_hull.func = pickerHull
 picker_hull_special.func = pickerHull
 picker_crystal = Topic(f"\"Oh! That weird crystal thing is a power source?\" says {picker.lowNameArticle(True)} . \"Sorry. I don't know anything about it. It might not be such a bad thing that it's broken, though. It wouldn't be a good idea to try and sail away from here.\" ")
@@ -2941,49 +2953,47 @@ picker_crystal_special.addAlternatePhrasing("ask her picker ket woman about repa
 
 picker_hi3 = Topic(f"\"You came!\" says Ket. \"I'm so glad. As promised, I'll tell you all about the island. Have some Kaur.\" Ket beams. ")
 def pickerHi3(app, suggest=True):
-	game.addText(picker_hi3.text)
-	picker.addSpecialTopic(picker_kaur_special)
-	picker.addSpecialTopic(picker_accept_kaur)
-	##hints.setNode(findWreckHintNode)
-	#hints.closeNode(meetKetHintNode)
-	if suggest:
-		picker.printSuggestions(game)
+    game.addText(picker_hi3.text)
+    picker.addSpecialTopic(picker_kaur_special)
+    picker.addSpecialTopic(picker_accept_kaur)
+    ##hints.setNode(findWreckHintNode)
+    #hints.closeNode(meetKetHintNode)
+    if suggest:
+        picker.printSuggestions(game)
 picker_hi3.func = pickerHi3
 picker_hi4 = Topic(f"\"Hey,\" says Ket. \"You haven't had any Kaur! Drink some, won't you? You'll be safe from the Storm if you do.\"")
 picker_kaur = Topic(f"\"Kaur is a gift of the Goddess,\" says Ket. She takes a swig of her drink, and continues. \"It helps us to connect to her. She protects everyone who drinks it. She'll protect you, too, if you have some. You will, won't you?\"")
 picker_kaur_special = SpecialTopic("ask about the drink called Kaur", picker_kaur.text)
 def pickerKaur(app, suggest=True):
-	game.addText(picker_kaur.text)
-	picker.removeSpecialTopic(picker_kaur_special)
-	picker.addSpecialTopic(picker_goddess_special)
-	picker.printSuggestions(game)
+    game.addText(picker_kaur.text)
+    picker.removeSpecialTopic(picker_kaur_special)
+    picker.addSpecialTopic(picker_goddess_special)
+    picker.printSuggestions(game)
 picker_kaur.func = pickerKaur
 picker_kaur_special.func = pickerKaur
 picker_goddess = Topic(f"\"The Goddess of the Storm is fearsome,\" says Ket. \"She kills every outsider who passes through our waters. She would have killed you, too, if it weren't for Arai's enchantment. She might yet, if you don't drink up. To we, her devoted, the Goddess is a protector; a mother. At the four altars, we kneel and pray. We drink of the Kaur. In return, we have peace, and prosperity. It's not such a bad trade. Join us, won't you? Have some Kaur.\" ")
 picker_goddess_special = SpecialTopic("ask about the Goddess of the Storm", picker_goddess.text)
 def pickerGoddess(app, suggest=True):
-	game.addText(picker_goddess.text)
-	picker.removeSpecialTopic(picker_goddess_special)
-	altar_n29.makeKnown(me)
-	picker.addSpecialTopic(picker_altars_special)
-	picker.printSuggestions(game)
+    game.addText(picker_goddess.text)
+    picker.removeSpecialTopic(picker_goddess_special)
+    altar_n29.makeKnown(me)
+    picker.addSpecialTopic(picker_altars_special)
+    picker.printSuggestions(game)
 picker_goddess.func = pickerGoddess
 picker_goddess_special.func = pickerGoddess
 picker_altars = Topic("Ket sips on her drink. \"At the temple, there are four altars to the Storm - the north, the south, the east, and the west,\" she says. \"Each altar corresponds to an element of life. Its meaning is encapsulated in a symbol. The north altar is Earth. It's about the material world, in particular, our wealth, and posessions. Its symbol is the Disk. The east altar is Air - conflict, internal and external. Its symbol is the Wing. The south is Fire. It's about energy, and creativity. The truest Fire is the power of the Sun itself. Finally, the west, Water, is about emotions and relationships. That one's the Ocean. <br>\"When we need help from our Goddess, we pray in the temple. Sometimes, we make an offering - usually just Kaur - at the altar that corresponds to our problem. Speaking of Kaur, aren't you going to have some?\" ")
 picker_altars_special = SpecialTopic("ask about the four altars", picker_altars.text)
 def pickerAltars(app, suggest=True):
-	game.addText(picker_altars.text)
-	#picker.removeSpecialTopic(picker_altars_special)
-	picker.addSpecialTopic(kaur_offering_topic)
-	picker.printSuggestions(game)
+    game.addText(picker_altars.text)
+    #picker.removeSpecialTopic(picker_altars_special)
+    picker.addSpecialTopic(kaur_offering_topic)
+    picker.printSuggestions(game)
 picker_altars.func = pickerAltars
 picker_altars_special.func = pickerAltars
 picker_accept_kaur = SpecialTopic("accept the Kaur", "You accept the Kaur Ket offers you. <br>The liquid in the cup is thick and green. It smells like fermented fruit, with a hint of something chemical. You take a sip. Instantly, you feel at ease. You smile at Ket, and she smiles back. Encouraged, you swallow the rest. <br>You feel Ket relax, relieved at your assured safety. You feel the others in the pub, blissful with Kaur. You feel the people of the island, moving through their many, connected lives. The Goddess of the Storm watches over Her children. She watches over <i>you.</i> You belong here, with Her. You are at peace. ")
 def pickerAcceptKaur(app, suggest=True):
-	game.addText(picker_accept_kaur.text)
-	global special_box_style
-	
-	kaur_ending.endGame(game)
+    game.addText(picker_accept_kaur.text)
+    kaur_ending.endGame(game)
 picker_accept_kaur.func = pickerAcceptKaur
 
 yard28.addThing(picker)
@@ -3029,14 +3039,14 @@ lantern.invItem= False
 lantern.cannotTakeMsg = "You don't need a lantern right now. Your light crystal will light your way just fine. "
 lantern_stand = Surface("stand")
 def putOnStandFunc(game, dobj):
-	if dobj==lantern:
-		game.addText("You set the lantern back on the stand. ")
-		me.removeThing(lantern)
-		lantern_stand.addThing(lantern)
-		return False
-	else:
-		game.addText(dobj.capNameArticle(True) + " doesn't fit on the stand. ")
-		return False
+    if dobj==lantern:
+        game.addText("You set the lantern back on the stand. ")
+        me.removeThing(lantern)
+        lantern_stand.addThing(lantern)
+        return False
+    else:
+        game.addText(dobj.capNameArticle(True) + " doesn't fit on the stand. ")
+        return False
 lantern_stand.setInVerbIobj = putOnStandFunc
 lantern_stand.setAdjectives(["lantern"])
 lantern_stand.invItem = False
@@ -3063,9 +3073,9 @@ altar_s29.describeThing("")
 altar_s29.xdescribeThing("The south altar is made of smooth, white stone. ")
 temple29.addThing(altar_s29)
 def putOnAltarS(game, dobj):
-	if dobj==lightcrystal:
-		lantern.invItem = True
-	return True
+    if dobj==lightcrystal:
+        lantern.invItem = True
+    return True
 altar_s29.setOnVerbIobj = putOnAltarS
 altar_e29 = Surface("altar")
 altar_e29.addSynonym("altars")
@@ -3140,10 +3150,10 @@ docks30.describeThing("")
 docks30.xdescribeThing("Along the docks, boats of all shapes and sizes are tied. ")
 shore30.addThing(docks30)
 def go_in_boats30(game):
-	game.addText("It would look pretty suspicious if you climbed into someone else's boat. ")
+    game.addText("It would look pretty suspicious if you climbed into someone else's boat. ")
 boats30.climbInVerbDobj = go_in_boats30
 def go_on_docks30(game):
-	game.addText("There's no reason to go out on the docks. ")
+    game.addText("There's no reason to go out on the docks. ")
 docks30.climbOnVerbDobj = go_on_docks30
 
 disk = Thing("stone")
@@ -3222,11 +3232,11 @@ cavegroup.ceiling = caveceiling
 # CAVE 0 (Entrance)
 cave0 = Room("Caverns, Entrance", "You are in a cavern the size of a small room. ")
 def cave0arrive(game):
-	#hints.closeNode(findCaveHintNode)
-	pass
+    #hints.closeNode(findCaveHintNode)
+    pass
 cave0.arriveFunc = cave0arrive
 for wall in cave0.walls:
-	wall.xdescribeThing("The wall is made of rough rock, curving inward toward the ceiling. ")
+    wall.xdescribeThing("The wall is made of rough rock, curving inward toward the ceiling. ")
 cave0.north_wall.describeThing("The stone wall opposite to the exit has been flattened out, and carved with images of towering ocean waves. ")
 cave0.north_wall.xdescribeThing(cave0.north_wall.desc)
 cave0.south = temple14
@@ -3252,50 +3262,50 @@ passage0.describeThing("")
 passage0.xdescribeThing("The passageway is dark. ")
 
 def lookInPassage0(game):
-	game.addText("It's too dark to see inside. ")
+    game.addText("It's too dark to see inside. ")
 def putInPassage0(game, dobj):
-	if dobj==lightcrystal:
-		game.addText("You shine the crystal down the passageway. You still aren't able to see much. ")
-	else:
-		game.addText("You're not going to start dropping your possessions into dark holes. ")
-	return False
+    if dobj==lightcrystal:
+        game.addText("You shine the crystal down the passageway. You still aren't able to see much. ")
+    else:
+        game.addText("You're not going to start dropping your possessions into dark holes. ")
+    return False
 def climbInPassage0(game):
-	from intficpy import travel
-	travel.travelN(game)
-	return False
+    from intficpy import travel
+    travel.travelN(game)
+    return False
 passage0.lookInVerbDobj = lookInPassage0
 passage0.setInVerbIobj = putInPassage0
 passage0.climbInVerbDobj = climbInPassage0
 
 def cave0Reveal(game):
-	if cave0.north:
-		game.addText("Looking through the lens reveals nothing further. ")
-		return True
-	else:
-		game.addText("The lens reveals a previously invisible passageway opening in the middle of the north wall of the cavern. ")
-		cave0.north_wall.describeThing("The stone wall opposite to the exit has been flattened out, and carved with images of towering ocean waves. In the middle of the wall, a passageway leads north. ")
-		cave0.north_wall.xdescribeThing(cave0.north_wall.desc)
-		cave0.addThing(passage0)
-		cave0.north = cave1
-		cave0.enter = cave1
-		return True
+    if cave0.north:
+        game.addText("Looking through the lens reveals nothing further. ")
+        return True
+    else:
+        game.addText("The lens reveals a previously invisible passageway opening in the middle of the north wall of the cavern. ")
+        cave0.north_wall.describeThing("The stone wall opposite to the exit has been flattened out, and carved with images of towering ocean waves. In the middle of the wall, a passageway leads north. ")
+        cave0.north_wall.xdescribeThing(cave0.north_wall.desc)
+        cave0.addThing(passage0)
+        cave0.north = cave1
+        cave0.enter = cave1
+        return True
 cave0.lensReveal = cave0Reveal
-		
+        
 # CAVE 1 (Upper Level)
 cave1 = Room("Caverns, Upper Level", "You are in a cavern the size of a small room. ")
 def cave1Discover(game):
-	arai.default_topic = arai_p2_default3
-	pickaxeSuggest()
+    arai.default_topic = arai_p2_default3
+    pickaxeSuggest()
 cave1.onDiscover = cave1Discover
 def cave1Arrive(game):
-	global storm_caves
-	if storm_turns_left==storm_turns_full or storm_caves > 0:
-		return None
-	storm_caves += 1
-	game.addText("As you enter, an image appears in your mind, vivid as the world around you. <br><br>A young man and an old man stand before you, in long brown cloaks. They are engaged in intense discussion. <br><br>\"It's something about these caves, Brother,\" the younger says. \"There's a vein of opal below us that seems to resonate with <i>something</i>. Something not of this world. If we can find a way to harness it, it could be the breakthrough we've been searching for.\"<br><br>\"Be careful, child,\" says the old man. \"Be very careful. What we do not understand, we cannot control.\"<br><br>The scene fades from your mind, leaving you once more alone in the cavern. ")
-	
-	return None
-	#hints.closeNode(enterCaveHintNode)
+    global storm_caves
+    if storm_turns_left==storm_turns_full or storm_caves > 0:
+        return None
+    storm_caves += 1
+    game.addText("As you enter, an image appears in your mind, vivid as the world around you. <br><br>A young man and an old man stand before you, in long brown cloaks. They are engaged in intense discussion. <br><br>\"It's something about these caves, Brother,\" the younger says. \"There's a vein of opal below us that seems to resonate with <i>something</i>. Something not of this world. If we can find a way to harness it, it could be the breakthrough we've been searching for.\"<br><br>\"Be careful, child,\" says the old man. \"Be very careful. What we do not understand, we cannot control.\"<br><br>The scene fades from your mind, leaving you once more alone in the cavern. ")
+    
+    return None
+    #hints.closeNode(enterCaveHintNode)
 cave0.arriveFunc = cave0arrive
 cave1.arriveFunc = cave1Arrive
 cave1.south = cave0
@@ -3311,30 +3321,30 @@ rock1.describeThing(f"A large rock blocks the way to the west.")
 
 rock1.xdescribeThing("The rock looks heavy. ")
 def pickaxeSuggest():
-	vendor.addSpecialTopic(vendor_pickaxe_special)
+    vendor.addSpecialTopic(vendor_pickaxe_special)
 rock_barriers.append(rock1)
 #cave1.addThing(pickaxe)
 cave1.addThing(rock1)
 def rock1climb(game):
-	game.addText("You can't get a good enough hold on it to climb over. ")
-	return False
+    game.addText("You can't get a good enough hold on it to climb over. ")
+    return False
 def rock1BreakDobj(game):
-	game.addText("What would you like to break it with? ")
-	game.parser.command.dobj = GrammarObj(target=rock1)
-	game.parser.command.verb = breakWithVerb
-	game.parser.command.ambiguous = True
-	return False
+    game.addText("What would you like to break it with? ")
+    game.parser.command.dobj = GrammarObj(target=rock1)
+    game.parser.command.verb = breakWithVerb
+    game.parser.command.ambiguous = True
+    return False
 def rocks2BreakDobj(game):
-	game.addText("What would you like to break them with? ")
-	game.parser.command.dobj = GrammarObj(target=rocks1)
-	game.parser.command.verb = breakWithVerb
-	game.parser.command.ambiguous = True
-	return False
+    game.addText("What would you like to break them with? ")
+    game.parser.command.dobj = GrammarObj(target=rocks1)
+    game.parser.command.verb = breakWithVerb
+    game.parser.command.ambiguous = True
+    return False
 rock1.breakVerbDobj = rock1BreakDobj
 rocks2.breakVerbDobj = rocks2BreakDobj
 def rock1Break(game):
-	game.addText("The way west is now clear. ")
-	cave1.west = cave2
+    game.addText("The way west is now clear. ")
+    cave1.west = cave2
 rock1.crushFunc = rock1Break
 pedestal1 = Thing("pedestal")
 dial1 = Thing("dial")
@@ -3366,12 +3376,12 @@ vellum2.setAdjectives(["vellum"])
 vellum2.describeThing("There is a sheet of vellum here, on which someone has written in black ink. ")
 vellum2.xdescribeThing("The vellum is old, but has held up remarkably well. It is covered in black writing. ")
 def vellumRead(game):
-	global arai_death_topics
-	game.addText(vellum2.read_desc)
-	if not arai_death_topics:
-		arai_death_topics = True
-		arai.addSpecialTopic(arai_p2_vellum1)
-		arai.addSpecialTopic(arai_p2_vellum2)
+    global arai_death_topics
+    game.addText(vellum2.read_desc)
+    if not arai_death_topics:
+        arai_death_topics = True
+        arai.addSpecialTopic(arai_p2_vellum1)
+        arai.addSpecialTopic(arai_p2_vellum2)
 vellum2.readText = vellumRead
 desk2.addThing(vellum2)
 
@@ -3379,8 +3389,8 @@ desk2.addThing(vellum2)
 # CAVE VISON 2
 cave3 = Room("Caverns, Upper Level East", "You are in a small cavern. ")
 def cave3Arrive(game):
-	#hints.setNode(l2keyHintNode)
-	pass
+    #hints.setNode(l2keyHintNode)
+    pass
 cave3.arriveFunc = cave3Arrive
 cave3.dark = True
 c3door = DoorConnector(cave3, "w", cave1, "e")
@@ -3394,7 +3404,7 @@ cave3.addThing(l2key)
 # CAVE 4_2 (chasm)
 cave4_2 = Room("Behind the Door, on the Precipice of a Chasm ", "You are on a narrow section of ground, at the edge of deep chasm stretching the width of the cavern. You can see the ground on the other side of the chasm, to the south. ")
 def chasmDiscover(game):
-	boatmaker.addSpecialTopic(boatmaker_board_special)
+    boatmaker.addSpecialTopic(boatmaker_board_special)
 cave4_2.onDiscover = chasmDiscover
 cave4_2.dark = True
 chasm4_2 = Thing("chasm")
@@ -3406,22 +3416,21 @@ chasm4_2.size = 100
 #cave4_2.addThing(woodboard)
 cave4_2.addThing(chasm4_2)
 def chasmSetIn(game, dobj):
-	if dobj==lightcrystal:
-		game.addText("You shine the light crystal into the chasm. A few more meters of rocky chasm wall is visible in the light, but nothing else. ")
-	else:
-		game.addText("You're not about to start dropping your possessions into the chasm. ")
-	return False
+    if dobj==lightcrystal:
+        game.addText("You shine the light crystal into the chasm. A few more meters of rocky chasm wall is visible in the light, but nothing else. ")
+    else:
+        game.addText("You're not about to start dropping your possessions into the chasm. ")
+    return False
 chasm4_2.setInVerbIobj = chasmSetIn
 def chasmLookIn(game):
-	game.addText("The chasm is wide, and empty. After a few metres, all you can see is black darkness. ")
-	return False
+    game.addText("The chasm is wide, and empty. After a few metres, all you can see is black darkness. ")
+    return False
 chasm4_2.lookInVerbDobj = chasmLookIn
 def chasmJumpIn(game):
-	game.addText("You throw yourself into the chasm. ")
-	global special_box_style
-	
-	chasm_ending.endGame(game)
-	return False
+    game.addText("You throw yourself into the chasm. ")
+    
+    chasm_ending.endGame(game)
+    return False
 chasm4_2.jumpInVerbDobj = chasmJumpIn
 cave4_2.south_msg = "You carefully cross your improvised bridge. "
 cave4_2.south_false_msg = "To the south is the chasm. There is currently no obvious way across. "
@@ -3439,16 +3448,16 @@ l2door.setLock(l2lock)
 # CAVE VISION 3
 cave4 = Room("Caverns, Lower Level", "The cavern is a bit wider here. To the north is a deep chasm. ")
 def cave4Arrive(game):
-	global storm_caves
-	if storm_turns_left==storm_turns_full or storm_caves > 1:
-		return None
-	storm_caves += 1
-	game.addText("Three cloaked men appear before you, standing by the south door. \"We should put that damned opal back in the ground,\" says the man on the right, middle aged, and stout. \"We've done enough. Brother Neman is <i>dead</i>, for God's sake.\" The scrawny boy beside him lets out a shuddering sob, and the man places a hand on his shoulder. \"It's time to stop this madness.\"<br><br>The third man, tall and thin, with sneering eyes, clears his throat loudly. \"Brothers, please,\" he says. \"Our Order is devoted to science - to theosophy - to discovering the beyond. We must let go of our small fears, and fulfil the our Oath. Brother Neman gladly died for progress. If you are not willing to do the same, then perhaps you should die for your cowardice. I will hear no more of this.\"")
-	return None
+    global storm_caves
+    if storm_turns_left==storm_turns_full or storm_caves > 1:
+        return None
+    storm_caves += 1
+    game.addText("Three cloaked men appear before you, standing by the south door. \"We should put that damned opal back in the ground,\" says the man on the right, middle aged, and stout. \"We've done enough. Brother Neman is <i>dead</i>, for God's sake.\" The scrawny boy beside him lets out a shuddering sob, and the man places a hand on his shoulder. \"It's time to stop this madness.\"<br><br>The third man, tall and thin, with sneering eyes, clears his throat loudly. \"Brothers, please,\" he says. \"Our Order is devoted to science - to theosophy - to discovering the beyond. We must let go of our small fears, and fulfil the our Oath. Brother Neman gladly died for progress. If you are not willing to do the same, then perhaps you should die for your cowardice. I will hear no more of this.\"")
+    return None
 def cave4Discover(game):
-	
-	chasmAchievement.award(game)
-	
+    
+    chasmAchievement.award(game)
+    
 cave4.arriveFunc = cave4Arrive
 cave4.discoverFunc = cave4Discover
 cave4.dark = True
@@ -3468,15 +3477,15 @@ rocks4.xdescribeThing("Fallen rocks block the way to the east. ")
 rocks4.invItem = False
 rock_barriers.append(rocks4)
 def rocks4Break(game):
-	game.addText("The way east is now clear. ")
-	cave4.east = cave5
+    game.addText("The way east is now clear. ")
+    cave4.east = cave5
 rocks4.crushFunc = rocks4Break
 def rocks4BreakDobj(game):
-	game.addText("What would you like to break them with? ")
-	game.parser.command.dobj = GrammarObj(target=rocks4)
-	game.parser.command.verb = breakWithVerb
-	game.parser.command.ambiguous = True
-	return False
+    game.addText("What would you like to break them with? ")
+    game.parser.command.dobj = GrammarObj(target=rocks4)
+    game.parser.command.verb = breakWithVerb
+    game.parser.command.ambiguous = True
+    return False
 rocks4.breakVerbDobj = rocks4BreakDobj
 cave4.addThing(rocks4)
 
@@ -3484,7 +3493,7 @@ cave4.addThing(rocks4)
 cave5 = Room("Caverns, Lower Level East", "This cavern is small, and unfinished, with curved walls of rough stone. ")
 cave5.dark = True
 for wall in cave5.walls:
-	wall.xdescribeThing("The wall is made rough grey stone. ")
+    wall.xdescribeThing("The wall is made rough grey stone. ")
 cave5.west = cave4
 puzzleboxkey = Readable("tablet", "The sequence \"742364\" has been pressed into the clay tablet. ")
 puzzleboxkey.setAdjectives(["small", "clay"])
@@ -3503,22 +3512,21 @@ puzzlebox.setAdjectives(["small", "cube", "shaped"])
 puzzlebox._verbose_name = "cube"
 puzzlebox.cur_code = [0, 0, 0, 0, 0, 0]
 def pbCodeStr():
-	out = ""
-	for d in puzzlebox.cur_code:
-		out = out + str(d)
-	return out
+    out = ""
+    for d in puzzlebox.cur_code:
+        out = out + str(d)
+    return out
 puzzlebox.codeStr = pbCodeStr
 puzzlebox.describeThing("On the ground is a cube, with six numbers and six buttons on the top face. ")
 puzzlebox.xdescribeThing(f"The cube has a mechanical display with six digits, currently {puzzlebox.codeStr()} . Under each of the six digits is a button, labeled 1 through 6. ")
 cave6.addThing(puzzlebox)
 def pbUnlockCheck(game):
-	if puzzlebox.cur_code == [7, 4, 2, 3, 6, 4] and pb_lock.is_locked:
-		pb_lock.makeUnlocked()
-		puzzlebox.makeOpen()
-		game.addText("The cube clicks open, revealing a key. ")
-		global special_box_style
-		
-		puzzleBoxAchievement.award(game)
+    if puzzlebox.cur_code == [7, 4, 2, 3, 6, 4] and pb_lock.is_locked:
+        pb_lock.makeUnlocked()
+        puzzlebox.makeOpen()
+        game.addText("The cube clicks open, revealing a key. ")
+        
+        puzzleBoxAchievement.award(game)
 pb_button1 = Pressable("1")
 pb_button1.addSynonym("button")
 pb_button1.setAdjectives(["button"])
@@ -3526,16 +3534,16 @@ pb_button1.has_proper_name = True
 pb_button1.describeThing("")
 pb_button1.xdescribeThing("The button below the first digit is labeled \"1\".")
 def b1func(game):
-	puzzlebox.cur_code[0] = puzzlebox.cur_code[0] + 1
-	puzzlebox.cur_code[3] = puzzlebox.cur_code[3] - 1
-	i = 0
-	for i in range(0, 6):
-		if puzzlebox.cur_code[i] > 9:
-			puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
-		elif puzzlebox.cur_code[i] < 0:
-			puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
-	game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
-	pbUnlockCheck(game)
+    puzzlebox.cur_code[0] = puzzlebox.cur_code[0] + 1
+    puzzlebox.cur_code[3] = puzzlebox.cur_code[3] - 1
+    i = 0
+    for i in range(0, 6):
+        if puzzlebox.cur_code[i] > 9:
+            puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
+        elif puzzlebox.cur_code[i] < 0:
+            puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
+    game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
+    pbUnlockCheck(game)
 pb_button1.pressThing = b1func
 puzzlebox.addComposite(pb_button1)
 pb_button2 = Pressable("2")
@@ -3545,18 +3553,18 @@ pb_button2.has_proper_name = True
 pb_button2.describeThing("")
 pb_button2.xdescribeThing("The button below the second digit is labeled \"2\".")
 def b2func(game):
-	puzzlebox.cur_code[0] = puzzlebox.cur_code[0] - 2
-	puzzlebox.cur_code[1] = puzzlebox.cur_code[1] + 2
-	puzzlebox.cur_code[3] = puzzlebox.cur_code[3] + 2
-	puzzlebox.cur_code[4] = puzzlebox.cur_code[4] - 2
-	i = 0
-	for i in range(0, 6):
-		if puzzlebox.cur_code[i] > 9:
-			puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
-		elif puzzlebox.cur_code[i] < 0:
-			puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
-	game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
-	pbUnlockCheck(game)
+    puzzlebox.cur_code[0] = puzzlebox.cur_code[0] - 2
+    puzzlebox.cur_code[1] = puzzlebox.cur_code[1] + 2
+    puzzlebox.cur_code[3] = puzzlebox.cur_code[3] + 2
+    puzzlebox.cur_code[4] = puzzlebox.cur_code[4] - 2
+    i = 0
+    for i in range(0, 6):
+        if puzzlebox.cur_code[i] > 9:
+            puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
+        elif puzzlebox.cur_code[i] < 0:
+            puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
+    game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
+    pbUnlockCheck(game)
 pb_button2.pressThing = b2func
 puzzlebox.addComposite(pb_button2)
 pb_button3 = Pressable("3")
@@ -3566,16 +3574,16 @@ pb_button3.has_proper_name = True
 pb_button3.describeThing("")
 pb_button3.xdescribeThing("The button below the third digit is labeled \"3\".")
 def b3func(game):
-	puzzlebox.cur_code[5] = puzzlebox.cur_code[5] + 1
-	puzzlebox.cur_code[2] = puzzlebox.cur_code[2] + 3
-	i = 0
-	for i in range(0, 6):
-		if puzzlebox.cur_code[i] > 9:
-			puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
-		elif puzzlebox.cur_code[i] < 0:
-			puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
-	game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
-	pbUnlockCheck(game)
+    puzzlebox.cur_code[5] = puzzlebox.cur_code[5] + 1
+    puzzlebox.cur_code[2] = puzzlebox.cur_code[2] + 3
+    i = 0
+    for i in range(0, 6):
+        if puzzlebox.cur_code[i] > 9:
+            puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
+        elif puzzlebox.cur_code[i] < 0:
+            puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
+    game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
+    pbUnlockCheck(game)
 pb_button3.pressThing = b3func
 puzzlebox.addComposite(pb_button3)
 pb_button4 = Pressable("4")
@@ -3585,16 +3593,16 @@ pb_button4.has_proper_name = True
 pb_button4.describeThing("")
 pb_button4.xdescribeThing("The button below the fourth digit is labeled \"4\".")
 def b4func(game):
-	puzzlebox.cur_code[0] = puzzlebox.cur_code[0] - 1
-	puzzlebox.cur_code[3] = puzzlebox.cur_code[3] + 1
-	i = 0
-	for i in range(0, 6):
-		if puzzlebox.cur_code[i] > 9:
-			puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
-		elif puzzlebox.cur_code[i] < 0:
-			puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
-	game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
-	pbUnlockCheck(game)
+    puzzlebox.cur_code[0] = puzzlebox.cur_code[0] - 1
+    puzzlebox.cur_code[3] = puzzlebox.cur_code[3] + 1
+    i = 0
+    for i in range(0, 6):
+        if puzzlebox.cur_code[i] > 9:
+            puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
+        elif puzzlebox.cur_code[i] < 0:
+            puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
+    game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
+    pbUnlockCheck(game)
 pb_button4.pressThing = b4func
 puzzlebox.addComposite(pb_button4)
 pb_button5 = Pressable("5")
@@ -3604,18 +3612,18 @@ pb_button5.has_proper_name = True
 pb_button5.describeThing("")
 pb_button5.xdescribeThing("The button below the fifth digit is labeled \"5\".")
 def b5func(game):
-	puzzlebox.cur_code[0] = puzzlebox.cur_code[0] + 2
-	puzzlebox.cur_code[1] = puzzlebox.cur_code[1] - 2
-	puzzlebox.cur_code[3] = puzzlebox.cur_code[3] - 2
-	puzzlebox.cur_code[4] = puzzlebox.cur_code[4] + 2
-	i = 0
-	for i in range(0, 6):
-		if puzzlebox.cur_code[i] > 9:
-			puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
-		elif puzzlebox.cur_code[i] < 0:
-			puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
-	game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
-	pbUnlockCheck(game)
+    puzzlebox.cur_code[0] = puzzlebox.cur_code[0] + 2
+    puzzlebox.cur_code[1] = puzzlebox.cur_code[1] - 2
+    puzzlebox.cur_code[3] = puzzlebox.cur_code[3] - 2
+    puzzlebox.cur_code[4] = puzzlebox.cur_code[4] + 2
+    i = 0
+    for i in range(0, 6):
+        if puzzlebox.cur_code[i] > 9:
+            puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
+        elif puzzlebox.cur_code[i] < 0:
+            puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
+    game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
+    pbUnlockCheck(game)
 pb_button5.pressThing = b5func
 puzzlebox.addComposite(pb_button5)
 pb_button6 = Pressable("6")
@@ -3625,16 +3633,16 @@ pb_button6.has_proper_name = True
 pb_button6.describeThing("")
 pb_button6.xdescribeThing("The button below the sixth digit is labeled \"6\".")
 def b6func(game):
-	puzzlebox.cur_code[5] = puzzlebox.cur_code[5] - 1
-	puzzlebox.cur_code[2] = puzzlebox.cur_code[2] - 3
-	i = 0
-	for i in range(0, 6):
-		if puzzlebox.cur_code[i] > 9:
-			puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
-		elif puzzlebox.cur_code[i] < 0:
-			puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
-	game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
-	pbUnlockCheck(game)
+    puzzlebox.cur_code[5] = puzzlebox.cur_code[5] - 1
+    puzzlebox.cur_code[2] = puzzlebox.cur_code[2] - 3
+    i = 0
+    for i in range(0, 6):
+        if puzzlebox.cur_code[i] > 9:
+            puzzlebox.cur_code[i] = puzzlebox.cur_code[i] - 10
+        elif puzzlebox.cur_code[i] < 0:
+            puzzlebox.cur_code[i] = 10 + puzzlebox.cur_code[i]
+    game.addText("The digits on the cube now read " + puzzlebox.codeStr() + ". ")
+    pbUnlockCheck(game)
 pb_button6.pressThing = b6func
 puzzlebox.addComposite(pb_button6)
 puzzlebox.giveLid()
@@ -3657,59 +3665,58 @@ cursedstar.describeThing("A porcelain star is mounted near the middle of the doo
 cursedstar.xdescribeThing("It's a four point star made of translucent white porcelain. ")
 cursedstar.broken = False
 def breakStar(game):
-	if cursedstar.broken:
-		game.addText("The porcelain star is already broken. ")
-	else:
-		game.addText("You smash the porcelain star. ")
-		cursedstar.broken = True
-		cursedstar.describeThing("A few shards of porcelain remain attached to the door. ")
-		cursedstar.xdescribeThing("The star is completely shattered. ")
-		cursedstar.setAdjectives(["broken", "shattered", "porcelain"])
-		cursedstar.addSynonym("porcelain")
-		cursedstar._verbose_name = "shattered porcelain"
-		global special_box_style
-		
-		curseAchievement.award(game)
-	return False
+    if cursedstar.broken:
+        game.addText("The porcelain star is already broken. ")
+    else:
+        game.addText("You smash the porcelain star. ")
+        cursedstar.broken = True
+        cursedstar.describeThing("A few shards of porcelain remain attached to the door. ")
+        cursedstar.xdescribeThing("The star is completely shattered. ")
+        cursedstar.setAdjectives(["broken", "shattered", "porcelain"])
+        cursedstar.addSynonym("porcelain")
+        cursedstar._verbose_name = "shattered porcelain"
+        
+        curseAchievement.award(game)
+    return False
 cursedstar.breakVerbDobj = breakStar
 cursedstar.kickVerbDobj = breakStar
 #caveLLWdoor.entranceA.addComposite(cursedstar) # remove this and put is in the lens func
 curse_scene = 0
 def cLLWbarrier(game):
-	global curse_scene
-	if cursedstar.broken:
-		return False
-	else:
-		game.addText("As you step through the door, your mind is filled with an image so vidid that you can hardly see what's in front of you. You see the opal touching the earth. Then, you see the island engulfed in a storm. The streets are flooded. Villagers scream and cry, or stand, staring expressionless at the sky. After a few moments, they start dropping dead. You are shown image after image of death, and destruction. ")
-		scenarios = [f"{daughter.capNameArticle(True)} kneels by her fallen father, face wild with terror. Hands clasped at her chest, she screams a wordless prayer to her unhearing goddess, as tears stream down her face. ", "The vendor you spoke with at the market, who was so eager to help you, lies on the ground beside her stall. She trembles and gasps helpless as the storm water flows around her. Blood runs from a wound on her head. She sputters and coughs as the water level rises, her body jerking violently, until suddenly, she is still. She will never move again. ", "Ket the Picker stands on the shore, transfixed by the sky. A young boy, perhaps her brother, shakes her shoulder, crying, pleading. Ket hears nothing. The boy tugs her arm, and she falls sideways, hitting the ground like a sack of clothes. Still, she stares into the distance. She is not inside her body anymore. She is an empty husk. Her brother cries alone. ", "You recognize two boys you saw playing around town. One is dead now. The other struggles to carry him to higher ground. He whispers to the dead boy. \"It'll be all right,\" he says. \"We'll find the doctor. Don't be scared. I'm here. I won't leave you.\" He slips in the mud, and his head hits a rock. He doesn't get up. "]
-		if curse_scene == len(scenarios):
-			curse_scene = 0
-		game.addText("Among them, you see familiar faces. " + scenarios[curse_scene])
-		game.addText("Eventually, the vision vanishes, and you find yourself back where you began. ")
-		if curse_scene < len(scenarios):
-			curse_scene = curse_scene + 1
-		return True
+    global curse_scene
+    if cursedstar.broken:
+        return False
+    else:
+        game.addText("As you step through the door, your mind is filled with an image so vidid that you can hardly see what's in front of you. You see the opal touching the earth. Then, you see the island engulfed in a storm. The streets are flooded. Villagers scream and cry, or stand, staring expressionless at the sky. After a few moments, they start dropping dead. You are shown image after image of death, and destruction. ")
+        scenarios = [f"{daughter.capNameArticle(True)} kneels by her fallen father, face wild with terror. Hands clasped at her chest, she screams a wordless prayer to her unhearing goddess, as tears stream down her face. ", "The vendor you spoke with at the market, who was so eager to help you, lies on the ground beside her stall. She trembles and gasps helpless as the storm water flows around her. Blood runs from a wound on her head. She sputters and coughs as the water level rises, her body jerking violently, until suddenly, she is still. She will never move again. ", "Ket the Picker stands on the shore, transfixed by the sky. A young boy, perhaps her brother, shakes her shoulder, crying, pleading. Ket hears nothing. The boy tugs her arm, and she falls sideways, hitting the ground like a sack of clothes. Still, she stares into the distance. She is not inside her body anymore. She is an empty husk. Her brother cries alone. ", "You recognize two boys you saw playing around town. One is dead now. The other struggles to carry him to higher ground. He whispers to the dead boy. \"It'll be all right,\" he says. \"We'll find the doctor. Don't be scared. I'm here. I won't leave you.\" He slips in the mud, and his head hits a rock. He doesn't get up. "]
+        if curse_scene == len(scenarios):
+            curse_scene = 0
+        game.addText("Among them, you see familiar faces. " + scenarios[curse_scene])
+        game.addText("Eventually, the vision vanishes, and you find yourself back where you began. ")
+        if curse_scene < len(scenarios):
+            curse_scene = curse_scene + 1
+        return True
 caveLLWdoor.barrierFunc = cLLWbarrier
 def cave4Reveal(game):
-	if cursedstar.parent_obj:
-		game.addText("Looking through the lens reveals nothing further. ")
-		return True
-	else:
-		game.addText("Looking through the lens, you can see a porcelain star mounted on the west door. ")
-		caveLLWdoor.entranceA.addComposite(cursedstar)
-		return True
+    if cursedstar.parent_obj:
+        game.addText("Looking through the lens reveals nothing further. ")
+        return True
+    else:
+        game.addText("Looking through the lens, you can see a porcelain star mounted on the west door. ")
+        caveLLWdoor.entranceA.addComposite(cursedstar)
+        return True
 cave4.lensReveal = cave4Reveal
 # CAVE 7 (The Depths - bury the opal - contains Ceremonial Blade)
 # CAVE VISION 7
 cave7 = Room("Caverns, Depths", "You are in a wide cavern, deep in the earth. ")
 def cave7Arrive(game):
-	global storm_caves
-	if storm_turns_left==storm_turns_full or storm_caves > 2:
-		return None
-	storm_caves += 1
-	
-	game.addText(f"\"Revered Brother!\" cries a young man's voice. \"The opal vein below us! It's resonating with the same frquency the sample is picking up! I think they're still connected. The reaction is getting too much energy. God only knows what'll happen if this blows - what forces could enter our world. We have to - \"<br><br>With a blast, a bright arc connects the ground below with something far above. It snakes through the passageways, shining silver white, and crackling, before vanishing in an instant.<br><br>What you have just experienced is a memory, but it isn't yours. It's a memory of this place. ")
-	return None
+    global storm_caves
+    if storm_turns_left==storm_turns_full or storm_caves > 2:
+        return None
+    storm_caves += 1
+    
+    game.addText(f"\"Revered Brother!\" cries a young man's voice. \"The opal vein below us! It's resonating with the same frquency the sample is picking up! I think they're still connected. The reaction is getting too much energy. God only knows what'll happen if this blows - what forces could enter our world. We have to - \"<br><br>With a blast, a bright arc connects the ground below with something far above. It snakes through the passageways, shining silver white, and crackling, before vanishing in an instant.<br><br>What you have just experienced is a memory, but it isn't yours. It's a memory of this place. ")
+    return None
 cave7.arriveFunc = cave7Arrive
 cave7.dark = True
 fan = Thing("fan")
@@ -3718,14 +3725,14 @@ fan._verbose_name = "painted fan"
 fan.describeThing("On the ground is a hand held fan, painted with a feather pattern, reminiscent of a seagull's wing. ")
 fan.xdescribeThing("The fan's surface is covered in painted feathers, mostly white, with a line of black along the leading edge. ")
 def fanUse(game):
-	game.addText("You fan yourself a bit. ")
-	return False
+    game.addText("You fan yourself a bit. ")
+    return False
 fan.useVerbDobj = fanUse
 cave7.addThing(fan)
 prayer1 = Readable("prayer", "You read the words carved into the cavern wall. <br><br><i>You who brings the rain, I pray thee, listen. <br>You who protects this land, <br>You who kills the interloper; sinks ships; holds our hearts - <br>Hear my cry, O Goddess of the Storm, <br>Come before me now, <br>See my flesh and soul, <br>Take the gifts I offer. Hear my request. <br>So be it.</i> ")
 def prayer1func(game):
-	game.addText(prayer1.read_desc)
-	goddess_abs.addSpecialTopic(prayer_topic1)
+    game.addText(prayer1.read_desc)
+    goddess_abs.addSpecialTopic(prayer_topic1)
 prayer1.readText = prayer1func
 prayer1.addSynonym("carving")
 prayer1.addSynonym("poem")
@@ -3745,76 +3752,18 @@ depths_entrance.setLock(depths_lock)
 cavegroup.setMembers([cave0, cave1, cave2, cave3, cave4, cave4_2, cave5, cave6, cave7, cave_LL_ante, depths_ante])
 
 for key, room in rooms.items():
-	g = goddess_abs.copyThing()
-	if isinstance(room, Room):
-		room.addThing(g) 
+    g = goddess_abs.copyThing()
+    if isinstance(room, Room):
+        room.addThing(g) 
 
 # FUNCTIONS
 def opening(game):
-	game.addText("<b>ISLAND OF THE BLESSED: by JSMaika</b><br>  You are a sailor, on a long, solo journey across the Yalukan Ocean. You have passed many days alone on your little boat, and you will pass many more before you reach your homeland. One evening, as you are navigating through a small, mapped area in otherwise uncharted waters, you find yourself suddenly in the middle of a violent storm. You are blown off course - far off course. It is all you can do to keep from capsizing.  Despite your desperate attempts, you fail to escape the storm. The waves are dark mountains around you; titans, ready to swallow you whole, or crush you beneath their weight. You hold your tiny boat steady, riding wave after giant wave. You are cold, soaked to the skin. Your fingers ache as you tug the ropes. You are fading.  You are thrown suddenly out of your boat. Your body crashes against something hard, knocking the wind out of you. You have a sense, for a moment, of an inhuman presence, of something reaching toward you, before the world fades to nothing.  Welcome to <i>Island in the Storm</i>. Type INSTRUCTIONS for instructions.")
+    game.addText("<b>ISLAND OF THE BLESSED: by JSMaika</b><br>  You are a sailor, on a long, solo journey across the Yalukan Ocean. You have passed many days alone on your little boat, and you will pass many more before you reach your homeland. One evening, as you are navigating through a small, mapped area in otherwise uncharted waters, you find yourself suddenly in the middle of a violent storm. You are blown off course - far off course. It is all you can do to keep from capsizing.  Despite your desperate attempts, you fail to escape the storm. The waves are dark mountains around you; titans, ready to swallow you whole, or crush you beneath their weight. You hold your tiny boat steady, riding wave after giant wave. You are cold, soaked to the skin. Your fingers ache as you tug the ropes. You are fading.  You are thrown suddenly out of your boat. Your body crashes against something hard, knocking the wind out of you. You have a sense, for a moment, of an inhuman presence, of something reaching toward you, before the world fades to nothing.  Welcome to <i>Island in the Storm</i>. Type INSTRUCTIONS for instructions.")
 
 game.gameOpening = opening
 
 screen = app.primaryScreen()
 screen = screen.size()
-box_style1 = "QFrame {background-color: #232323; border: 1px solid #ffffff; border-radius:0px; margin-bottom: 15px} QLabel {color: #ffffff; border: none; font-size: 18px;}"
-box_style2 = "QFrame {background-color: #3a3a01; border: 2px solid #edf424; border-radius:0px; margin-bottom: 15px} QLabel {color: #edf424; border: none; font-size: 18px;}"
-special_box_style = "QFrame {background-color: #210111; border: 2px solid #f4245c; border-radius:0px; margin-bottom: 15px} QLabel {color: #f4245c; border: none; font-size: 18px;}"
-app_style = """
-	#MainWindow {
-		background-image: url(island_bg2.png);
-		background-color: #000000;
-	}
-	QLineEdit {
-		background: #ffffff;
-		font-size: 18px;
-	}
-"""
-scroll_style = """
-	/* VERTICAL */
-	QWidget {
-		background-color: transparent;
-		background-image: none;
-		border: none;
-	}
-	QScrollBar:vertical {
-		border: none;
-		background: #a3a3a3;
-		border-radius: 6px;
-		width: 30px;
-		margin: 10px 8px 10px 8px;
-	}
-
-	QScrollBar::handle:vertical {
-		background: #ffffff;
-		border-radius: 6px;
-		min-height: 15px;
-	}
-
-	QScrollBar::add-line:vertical {
-		background: none;
-		height: 10px;
-		subcontrol-position: bottom;
-		subcontrol-origin: margin;
-	}
-
-	QScrollBar::sub-line:vertical {
-		background: none;
-		height: 10px;
-		subcontrol-position: top left;
-		subcontrol-origin: margin;
-		position: absolute;
-	}
-
-	QScrollBar:up-arrow:vertical, QScrollBar::down-arrow:vertical {
-		background: none;
-	}
-
-	QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-		background: none;
-	}
-
-    """
 
 game.initGame()
 ex.show()
